@@ -1,4 +1,5 @@
 import importlib
+import os
 
 import gymnasium as gym
 
@@ -50,6 +51,8 @@ def find_simulator(env_id: str) -> str | None:
 
     # dmc
     try:
+        # dmc with headless rendering to avoid warning
+        os.environ["MUJOCO_GL"] = "osmesa"
         from dm_control.suite import ALL_TASKS
 
         all_tasks = ["-".join(task) for task in ALL_TASKS]
