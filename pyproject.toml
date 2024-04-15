@@ -1,0 +1,57 @@
+[tool.poetry]
+name = "milo"
+version = "0.1.0"
+description = ""
+authors = ["Joao A. Candido Ramos <joao.candido@etu.unige.ch>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+metaworld = {git = "https://github.com/Farama-Foundation/Metaworld.git", rev = "master"}
+# gymnasium = "^0.29.1" # metaworld uses v1 not v0
+dm-control = "1.0.14" # last version before mujoco v3, mandatory for metaworld...
+
+
+[tool.poetry.group.dev.dependencies]
+black = "^24.4.0"
+isort = "^5.13.2"
+flake8 = "^7.0.0"
+pytest = "^8.1.1"
+poethepoet = "^0.25.1"
+flake8-pyproject = "^1.2.3"
+
+
+[tool.black]
+line-length = 120
+
+[tool.isort]
+profile = "black"
+
+[tool.flake8]
+max-line-length = 120
+extend-ignore = ["E203","E701"]
+
+[tool.poe.tasks]
+# linting
+lint = "flake8 ."
+
+# formating
+black = "black ."
+isort = "isort ."
+format = ["isort", "black"]
+
+# testing
+test = "pytest"
+
+# cleaning generated files
+clean = """
+rm -rf .coverage
+        .mypy_cache
+        .pytest_cache
+        ./**/__pycache__
+        dist
+"""
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
