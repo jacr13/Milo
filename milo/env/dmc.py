@@ -68,6 +68,7 @@ class DMCGym(Env):
     ):
         """TODO comment up"""
 
+        # TODO: this seems to be set before importing dm_control suite to avoid warning
         # for details see https://github.com/deepmind/dm_control
         assert rendering in ["glfw", "egl", "osmesa"]
         os.environ["MUJOCO_GL"] = rendering
