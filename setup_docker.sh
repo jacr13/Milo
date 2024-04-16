@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 # Check if argument is passed
 if [ $# -eq 0 ]; then
