@@ -11,11 +11,6 @@ RUN apt-get update -q \
     && rm -rf /var/lib/apt/lists/*
 RUN pip install poetry
 
-# needed to prevend dmc rendering to crash at the end
-ENV DISABLE_RENDER_THREAD_OFFLOADING=true
-
-ENV MUJOCO_GL=osmea
-
 # --------- dev ---------
 FROM base AS dev
 COPY pyproject.toml .
