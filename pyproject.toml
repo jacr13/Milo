@@ -33,6 +33,19 @@ max-line-length = 120
 extend-ignore = ["E203","E701"]
 
 [tool.poe.tasks]
+# install
+install = "poetry install --no-root"
+install_nodev = "poetry install --no-root --no-dev"
+
+# delete virtual environment
+delete_venv = "poetry env remove python"
+
+# delete lock file
+delete_lock = "rm poetry.lock"
+
+# recreate virtual environment
+reinstall = ["delete_lock", "delete_venv", "install"]
+
 # linting
 lint = "flake8 ."
 
