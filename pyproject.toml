@@ -41,21 +41,24 @@ install_nodev = "poetry install --no-root --no-dev"
 delete_venv = "poetry env remove python"
 
 # delete lock file
-delete_lock = "rm poetry.lock"
+delete_lock = "rm -f poetry.lock"
 
 # recreate virtual environment
 reinstall = ["delete_lock", "delete_venv", "install"]
 
 # linting
-lint = "flake8 ."
+lint = "poetry run flake8 ."
 
 # formating
-black = "black ."
-isort = "isort ."
+black = "poetry run black ."
+isort = "poetry run isort ."
 format = ["isort", "black"]
 
 # testing
-test = "pytest"
+test = "poetry run python -m pytest"
+
+# test push
+pushable = "gh act --rm"
 
 # cleaning generated files
 clean = """
