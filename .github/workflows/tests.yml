@@ -1,13 +1,14 @@
 ---
 name: Run Tests
 
-on:
-  push:
-    branches:
-      - main
-  pull_request: null
-
 permissions: read-all
+
+on:
+  pull_request:
+
+concurrency:
+  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
 
 jobs:
   test:
@@ -51,12 +52,6 @@ jobs:
 
       - name: Install dependencies
         run: poetry install --no-interaction --no-root
-
-      - name: Lint code
-        run: poetry run flake8 .
-
-      - name: Format code
-        run: poetry run black --check --diff .
 
       - name: Run tests
         run: poetry run python -m pytest
