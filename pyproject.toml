@@ -57,9 +57,6 @@ format = ["isort", "black"]
 # testing
 test = "poetry run python -m pytest"
 
-# test push
-pushable = "gh act --rm"
-
 # cleaning generated files
 clean = """
 rm -rf .coverage
