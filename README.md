@@ -21,7 +21,7 @@ poetry install --no-root --no-dev
 | `poe install`         | Install project dependencies (shortcut for `poetry install --no-root`)                             |
 | `poe install_nodev`   | Install project dependencies without dev dependencies (`poetry install --no-root --no-dev`)        |
 | `poe delete_venv`     | Delete the virtual environment associated with the project                                         |
-| `poe delete_lock`     | Delete the Poetry lock file to reset dependencies                                                  |
+| `poe delete_lock`     | Delete the Poetry lockfile to reset dependencies                                                  |
 | `poe reinstall`       | Reinstall the virtual environment (equivalent to deleting lock, venv, and installing dependencies) |
 | `poe test`            | Run the test suite                                                                                 |
 | `poe clean`           | Clean up the repository by removing temporary files and other artifacts                            |
