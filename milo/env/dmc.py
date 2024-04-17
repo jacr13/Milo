@@ -25,7 +25,7 @@ def make(
     vector_kwargs: dict[str, Any] | None = None,
     wrappers: Sequence[Callable[[Env], Wrapper]] | None = None,
 ) -> gym.vector.VectorEnv:
-    """TODO: Fill."""
+    """Creates a dmc vectorized environment based on the given environment ID, number of environments, vectorization mode, environment specific arguments, vector arguments, and wrappers."""
     if env_spec_kwargs is None:
         env_spec_kwargs = {}
     if vector_kwargs is None:
@@ -41,7 +41,10 @@ def make(
 
 
 def _spec_to_box(spec: OrderedDict | list, dtype: type = np.float32) -> Box:
+    """Converts a specification of observation or action space to a gym Box space."""
+
     def extract_min_max(s: np.ndarray) -> tuple:
+        """Takes a numpy array and return the minimum and maximum values based on the type."""
         assert s.dtype == np.float64 or s.dtype == np.float32
         dim = int(np.prod(s.shape))
         if isinstance(s, specs.Array):
@@ -66,14 +69,14 @@ def _spec_to_box(spec: OrderedDict | list, dtype: type = np.float32) -> Box:
 
 
 def _flatten_obs(obs: dict[str, np.ndarray | float | int], dtype: type = np.float32) -> np.ndarray:
-    """Flatten the observation dictionary values into a single numpy array.
-    TODO: Fill.
-    """
+    """A function that flattens a dictionary of numpy arrays, floats, or integers into a single numpy array."""
     obs_pieces = [v.ravel() if isinstance(v, np.ndarray) else np.array([v]) for v in obs.values()]
     return np.concatenate(obs_pieces, axis=0).astype(dtype)
 
 
 class DMC2Gym(Env):
+    """Converts a dmc environment to a gym compatible environment."""
+
     def __init__(
         self,
         domain: str,
@@ -85,7 +88,6 @@ class DMC2Gym(Env):
         render_width: int = 64,
         render_camera_id: int = 0,
     ):
-        """TODO comment up."""
         if environment_kwargs is None:
             environment_kwargs = {}
         if task_kwargs is None:
@@ -119,7 +121,6 @@ class DMC2Gym(Env):
             self._action_space.seed(seed)
 
     def __getattr__(self, name: str) -> Any:
-        """Add this here so that we can easily access attributes of the underlying env."""
         return getattr(self._env, name)
 
     @property
@@ -132,11 +133,10 @@ class DMC2Gym(Env):
 
     @property
     def reward_range(self) -> tuple:
-        """DMC always has a per-step reward range of (0, 1)."""
         return 0, 1
 
     def step(self, action: np.ndarray) -> tuple[np.ndarray, float, bool, bool, dict[str, Any]]:
-        """Perform a step in the environment."""
+        """Executes a step in the environment."""
         if action.dtype.kind == "f":
             action = action.astype(np.float32)
         assert self._action_space.contains(action)
@@ -153,9 +153,7 @@ class DMC2Gym(Env):
         seed: int | np.random.RandomState | None = None,
         options: dict | None = None,
     ) -> tuple[np.ndarray, dict[str, Any]]:
-        """Reset the environment.
-        TODO: Fill.
-        """
+        """Resets the environment to its initial state depending on the seed and options."""
         if options:
             logging.warning(f"Currently doing nothing with options={options}")
 
@@ -175,6 +173,7 @@ class DMC2Gym(Env):
         width: int | None = None,
         camera_id: int | None = None,
     ) -> RenderFrame | list[RenderFrame] | None:
+        """Renders the current state of the environment."""
         height = height or self.render_height
         width = width or self.render_width
         camera_id = camera_id or self.render_camera_id

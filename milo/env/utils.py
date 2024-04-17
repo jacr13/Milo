@@ -8,13 +8,7 @@ from gymnasium.vector.sync_vector_env import SyncVectorEnv as OriginalSyncVector
 
 class SyncVectorEnv(OriginalSyncVectorEnv):
     def call_ids(self, name: str, args_ids: list) -> tuple[Any, ...]:
-        """Calls a sub-environment method with name and specific kwargs.
-
-        Returns
-        -------
-            Tuple of results
-
-        """
+        """Synchronously calls a method by name on all environments and returns the results."""
         assert len(args_ids) == len(self.envs), "number of args_ids must match number of envs"
         results = []
         for i, env in enumerate(self.envs):
@@ -35,24 +29,12 @@ class SyncVectorEnv(OriginalSyncVectorEnv):
 
 class AsyncVectorEnv(OriginalAsyncVectorEnv):
     def call_ids(self, name: str, *args: Any, **kwargs: Any) -> tuple[Any, ...]:
-        """Call a method from each parallel environment with idependent args
-        Args:
-            name (str): Name of the method or property to call.
-
-        Returns
-        -------
-            List of the results of the individual calls to the method or property for each environment.
-
-        """
+        """Asynchronously calls a method by name on all environments and waits for the result."""
         self.call_async_ids(name, *args, **kwargs)
         return self.call_wait()
 
     def call_async_ids(self, name: str, args_ids: list) -> None:
-        """Calls the method with name asynchronously and
-        Raises:
-            ClosedEnvironmentError: If the environment was closed (if :meth:`close` was previously called).
-            AlreadyPendingCallError: Calling `call_async` while waiting for a pending call to complete.
-        """
+        """A method to asynchronously call multiple functions with their respective arguments through pipes."""
         self._assert_is_running()
         if self._state != AsyncState.DEFAULT:
             raise AlreadyPendingCallError(
@@ -75,7 +57,7 @@ def gym_vector_env_creator(
     vectorization_mode: str,
     vector_kwargs: dict | None = None,
 ) -> SyncVectorEnv | AsyncVectorEnv:
-    """TODO: Fill."""
+    """Create a vectorized environment from a list of environment functions based on the specified vectorization mode."""
     if vector_kwargs is None:
         vector_kwargs = {}
 

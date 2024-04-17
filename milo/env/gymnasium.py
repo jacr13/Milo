@@ -13,7 +13,7 @@ def make(
     vector_kwargs: dict[str, Any] | None = None,
     wrappers: Sequence[Callable[[Env], Wrapper]] | None = None,
 ) -> gym.vector.VectorEnv:
-    """TODO: Fill."""
+    """Creates a gym vectorized environment based on the given environment ID, number of environments, vectorization mode, environment specific arguments, vector arguments, and wrappers."""
     if env_spec_kwargs is None:
         env_spec_kwargs = {}
     if vector_kwargs is None:

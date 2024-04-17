@@ -16,7 +16,7 @@ def make_env(
     vector_kwargs: dict[str, Any] | None = None,
     wrappers: Sequence[Callable[[Env], Wrapper]] | None = None,
 ) -> gym.vector.VectorEnv:
-    """TODO: Fill."""
+    """Creates a vectorized environment based on the provided parameters."""
     if env_spec_kwargs is None:
         env_spec_kwargs = {}
     if vector_kwargs is None:
@@ -49,7 +49,7 @@ def make_env(
 
 
 def find_simulator(env_id: str) -> str | None:
-    """TODO: Fill."""
+    """Checks for the existence of an environment ID in various simulation libraries and returns the name of the library if the ID is found. If the ID is not found in any of the libraries, it returns None."""
     # gymnasium
     try:
         import gymnasium as gym
