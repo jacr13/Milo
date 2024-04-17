@@ -2,30 +2,46 @@
 
 import logging
 import os
+from collections import OrderedDict
+from collections.abc import Callable, Sequence
+from typing import Any
 
 import gymnasium as gym
 import numpy as np
 from dm_control import suite
 from dm_env import specs
-from gymnasium.core import Env
+from gymnasium import Env, Wrapper
+from gymnasium.core import RenderFrame
 from gymnasium.spaces import Box
 
 from milo.env.utils import gym_vector_env_creator
 
 
-def make(env_id: str, num_envs: int = 1, vectorization_mode: str = "async", **kwargs) -> gym.vector.VectorEnv:
+def make(
+    env_id: str,
+    num_envs: int = 1,
+    vectorization_mode: str = "async",
+    env_spec_kwargs: dict[str, Any] | None = None,
+    vector_kwargs: dict[str, Any] | None = None,
+    wrappers: Sequence[Callable[[Env], Wrapper]] | None = None,
+) -> gym.vector.VectorEnv:
+    """TODO: Fill."""
+    if env_spec_kwargs is None:
+        env_spec_kwargs = {}
+    if vector_kwargs is None:
+        vector_kwargs = {}
+    if wrappers is None:
+        wrappers = []
+
     domain, task = env_id.split("-")
-    vector_kwargs = kwargs.get("vector_kwargs", {})
 
-    env_fns = [lambda: DMCGym(domain=domain, task=task, **kwargs) for _ in range(num_envs)]
+    env_fns = [lambda: DMC2Gym(domain=domain, task=task, **env_spec_kwargs) for _ in range(num_envs)]
 
-    envs = gym_vector_env_creator(env_fns, vectorization_mode, **vector_kwargs)
-
-    return envs
+    return gym_vector_env_creator(env_fns, vectorization_mode, **vector_kwargs)
 
 
-def _spec_to_box(spec, dtype=np.float32):
-    def extract_min_max(s):
+def _spec_to_box(spec: OrderedDict | list, dtype: type = np.float32) -> Box:
+    def extract_min_max(s: np.ndarray) -> tuple:
         assert s.dtype == np.float64 or s.dtype == np.float32
         dim = int(np.prod(s.shape))
         if isinstance(s, specs.Array):
@@ -36,6 +52,7 @@ def _spec_to_box(spec, dtype=np.float32):
             return s.minimum + zeros, s.maximum + zeros
         else:
             logging.error("Unrecognized type")
+            return None, None
 
     mins, maxs = [], []
     for s in spec:
@@ -48,27 +65,33 @@ def _spec_to_box(spec, dtype=np.float32):
     return Box(low, high, dtype=dtype)
 
 
-def _flatten_obs(obs, dtype=np.float32):
-    obs_pieces = [np.array([v]) if np.isscalar(v) else v.ravel() for v in obs.values()]
+def _flatten_obs(obs: dict[str, np.ndarray | float | int], dtype: type = np.float32) -> np.ndarray:
+    """Flatten the observation dictionary values into a single numpy array.
+    TODO: Fill.
+    """
+    obs_pieces = [v.ravel() if isinstance(v, np.ndarray) else np.array([v]) for v in obs.values()]
     return np.concatenate(obs_pieces, axis=0).astype(dtype)
 
 
-class DMCGym(Env):
+class DMC2Gym(Env):
     def __init__(
         self,
-        domain,
-        task,
-        task_kwargs={},
-        environment_kwargs={},
-        rendering="egl",
-        render_height=64,
-        render_width=64,
-        render_camera_id=0,
-        **kwargs
+        domain: str,
+        task: str,
+        task_kwargs: dict | None = None,
+        environment_kwargs: dict | None = None,
+        rendering: str = "egl",
+        render_height: int = 64,
+        render_width: int = 64,
+        render_camera_id: int = 0,
     ):
-        """TODO comment up"""
+        """TODO comment up."""
+        if environment_kwargs is None:
+            environment_kwargs = {}
+        if task_kwargs is None:
+            task_kwargs = {}
 
-        # TODO: this seems to be set before importing dm_control suite to avoid warning
+        # TODO: this seems to be present before importing dm_control suite to avoid warning
         # for details see https://github.com/deepmind/dm_control
         assert rendering in ["glfw", "egl", "osmesa"]
         os.environ["MUJOCO_GL"] = rendering
@@ -95,24 +118,25 @@ class DMCGym(Env):
             self._observation_space.seed(seed)
             self._action_space.seed(seed)
 
-    def __getattr__(self, name):
-        """Add this here so that we can easily access attributes of the underlying env"""
+    def __getattr__(self, name: str) -> Any:
+        """Add this here so that we can easily access attributes of the underlying env."""
         return getattr(self._env, name)
 
     @property
-    def observation_space(self):
+    def observation_space(self) -> Box:  # type: ignore
         return self._observation_space
 
     @property
-    def action_space(self):
+    def action_space(self) -> Box:  # type: ignore
         return self._action_space
 
     @property
-    def reward_range(self):
-        """DMC always has a per-step reward range of (0, 1)"""
+    def reward_range(self) -> tuple:
+        """DMC always has a per-step reward range of (0, 1)."""
         return 0, 1
 
-    def step(self, action):
+    def step(self, action: np.ndarray) -> tuple[np.ndarray, float, bool, bool, dict[str, Any]]:
+        """Perform a step in the environment."""
         if action.dtype.kind == "f":
             action = action.astype(np.float32)
         assert self._action_space.contains(action)
@@ -124,9 +148,16 @@ class DMCGym(Env):
         info = {"discount": timestep.discount}
         return observation, reward, termination, truncation, info
 
-    def reset(self, seed=None, options=None):
+    def reset(
+        self,
+        seed: int | np.random.RandomState | None = None,
+        options: dict | None = None,
+    ) -> tuple[np.ndarray, dict[str, Any]]:
+        """Reset the environment.
+        TODO: Fill.
+        """
         if options:
-            logging.warn("Currently doing nothing with options={:}".format(options))
+            logging.warning(f"Currently doing nothing with options={options}")
 
         if seed is not None:
             if not isinstance(seed, np.random.RandomState):
@@ -135,10 +166,15 @@ class DMCGym(Env):
 
         timestep = self._env.reset()
         observation = _flatten_obs(timestep.observation)
-        info = {}
+        info: dict[str, Any] = {}
         return observation, info
 
-    def render(self, height=None, width=None, camera_id=None):
+    def render(
+        self,
+        height: int | None = None,
+        width: int | None = None,
+        camera_id: int | None = None,
+    ) -> RenderFrame | list[RenderFrame] | None:
         height = height or self.render_height
         width = width or self.render_width
         camera_id = camera_id or self.render_camera_id

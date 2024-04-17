@@ -1,3 +1,5 @@
+import copy
+
 import gymnasium as gym
 import numpy as np
 import pytest
@@ -6,6 +8,7 @@ from milo.env import find_simulator, make_env
 
 
 def test_find_simulator():
+    """TODO: Fill."""
     # Test with an unsupported environment ID
     assert find_simulator("UnsupportedEnv-v0") is None
 
@@ -111,11 +114,13 @@ env_configs = [
 class TestMakeEnv:
     @pytest.mark.parametrize("env_config", env_configs)
     def test_create_environment(self, env_config):
-        env = make_env(**env_config)
+        env_config_copy = copy.deepcopy(env_config)
+        env_type = env_config_copy.pop("env_type")
+        env = make_env(**env_config_copy)
 
         assert isinstance(env, gym.vector.VectorEnv)
-        assert isinstance(env, env_config["env_type"])
-        assert env.num_envs == env_config["num_envs"]
+        assert isinstance(env, env_type)
+        assert env.num_envs == env_config_copy["num_envs"]
 
         reset_result = env.reset()
         assert len(reset_result) == 2
@@ -123,8 +128,10 @@ class TestMakeEnv:
 
     @pytest.mark.parametrize("env_config", env_configs)
     def test_reset_seed_step_environment(self, env_config):
-        env = make_env(**env_config)
-        num_envs = env_config["num_envs"]
+        env_config_copy = copy.deepcopy(env_config)
+        env_config_copy.pop("env_type")
+        env = make_env(**env_config_copy)
+        num_envs = env_config_copy["num_envs"]
 
         reset_result = env.reset(seed=13)
         assert len(reset_result) == 2

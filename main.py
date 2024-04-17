@@ -1,5 +1,4 @@
 from milo.env import make_env
-import numpy as np
 
 # gymnasium
 env = make_env("Humanoid-v5", num_envs=3, vectorization_mode="async", env_spec_kwargs={"render_mode": "rgb_array"})

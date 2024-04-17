@@ -1,14 +1,30 @@
 import importlib
 import os
+from collections.abc import Callable, Sequence
+from typing import Any
 
 import gymnasium as gym
+from gymnasium import Env, Wrapper
 
 
-def make_env(env_id: str, num_envs: int = 1, vectorization_mode: str = "async", **kwargs) -> gym.vector.VectorEnv:
-    # check if simulator provided
-    simulator = kwargs.get("simulator", None)
+def make_env(
+    env_id: str,
+    num_envs: int = 1,
+    vectorization_mode: str = "async",
+    simulator: str | None = None,
+    env_spec_kwargs: dict[str, Any] | None = None,
+    vector_kwargs: dict[str, Any] | None = None,
+    wrappers: Sequence[Callable[[Env], Wrapper]] | None = None,
+) -> gym.vector.VectorEnv:
+    """TODO: Fill."""
+    if env_spec_kwargs is None:
+        env_spec_kwargs = {}
+    if vector_kwargs is None:
+        vector_kwargs = {}
+    if wrappers is None:
+        wrappers = []
 
-    # if not attempt to detect simulator automatically
+    # f simulator is not provided, attempt to detect simulator automatically
     if simulator is None:
         simulator = find_simulator(env_id)
 
@@ -18,19 +34,22 @@ def make_env(env_id: str, num_envs: int = 1, vectorization_mode: str = "async", 
 
     # if simulator found or given create environment
     try:
-        make = getattr(importlib.import_module(f"milo.env.{simulator}"), "make")
+        make = importlib.import_module(f"milo.env.{simulator}").make
 
         return make(
             env_id,
             num_envs=num_envs,
             vectorization_mode=vectorization_mode,
-            **kwargs,
+            env_spec_kwargs=env_spec_kwargs,
+            vector_kwargs=vector_kwargs,
+            wrappers=wrappers,
         )
-    except ModuleNotFoundError:
-        raise ValueError(f"Cannot create environment {env_id} because simulator {simulator} is not supported.")
+    except ModuleNotFoundError as exc:
+        raise ValueError(f"Cannot create environment {env_id} because simulator {simulator} is not supported.") from exc
 
 
 def find_simulator(env_id: str) -> str | None:
+    """TODO: Fill."""
     # gymnasium
     try:
         import gymnasium as gym

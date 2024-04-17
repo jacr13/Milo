@@ -1,19 +1,36 @@
 import random
+from collections.abc import Callable, Sequence
+from typing import Any
 
 import gymnasium as gym
 import metaworld
+from gymnasium import Env, Wrapper
 
 from milo.env.utils import gym_vector_env_creator
 
 
-def make(env_id: str, num_envs: int = 1, vectorization_mode: str = "async", **kwargs) -> gym.vector.VectorEnv:
-    render_mode = kwargs.get("render_mode", "rgb_array")
-    vector_kwargs = kwargs.get("vector_kwargs", {})
+def make(
+    env_id: str,
+    num_envs: int = 1,
+    vectorization_mode: str = "async",
+    env_spec_kwargs: dict[str, Any] | None = None,
+    vector_kwargs: dict[str, Any] | None = None,
+    wrappers: Sequence[Callable[[Env], Wrapper]] | None = None,
+) -> gym.vector.VectorEnv:
+    """TODO: Fill."""
+    if env_spec_kwargs is None:
+        env_spec_kwargs = {}
+    if vector_kwargs is None:
+        vector_kwargs = {}
+    if wrappers is None:
+        wrappers = []
+
+    render_mode = env_spec_kwargs.get("render_mode", "rgb_array")
 
     ml1 = metaworld.ML1(env_id)
-    env_fns = [lambda: ml1.train_classes[env_id](render_mode=render_mode) for _ in range(num_envs)]
+    env_fns = [lambda: ml1.train_classes[env_id](render_mode=render_mode, **env_spec_kwargs) for _ in range(num_envs)]
 
-    envs = gym_vector_env_creator(env_fns, vectorization_mode, **vector_kwargs)
+    envs = gym_vector_env_creator(env_fns, vectorization_mode, vector_kwargs=vector_kwargs)
 
     # Randomly sample tasks, assumes num_env <= len(train_tasks)
     assert num_envs <= len(ml1.train_tasks), "num_envs must be <= len(train_tasks)"

@@ -6,27 +6,14 @@ from gymnasium.vector.async_vector_env import AsyncVectorEnv as OriginalAsyncVec
 from gymnasium.vector.sync_vector_env import SyncVectorEnv as OriginalSyncVectorEnv
 
 
-def gym_vector_env_creator(env_fns: list, vectorization_mode: str, **vector_kwargs):
-    if vectorization_mode == "async":
-        return AsyncVectorEnv(
-            env_fns=env_fns,
-            **vector_kwargs,
-        )
-    elif vectorization_mode == "sync":
-        return SyncVectorEnv(
-            env_fns=env_fns,
-            **vector_kwargs,
-        )
-    else:
-        raise ValueError(f"Invalid vectorization mode {vectorization_mode}.")
-
-
 class SyncVectorEnv(OriginalSyncVectorEnv):
     def call_ids(self, name: str, args_ids: list) -> tuple[Any, ...]:
         """Calls a sub-environment method with name and specific kwargs.
 
-        Returns:
+        Returns
+        -------
             Tuple of results
+
         """
         assert len(args_ids) == len(self.envs), "number of args_ids must match number of envs"
         results = []
@@ -52,17 +39,19 @@ class AsyncVectorEnv(OriginalAsyncVectorEnv):
         Args:
             name (str): Name of the method or property to call.
 
-        Returns:
+        Returns
+        -------
             List of the results of the individual calls to the method or property for each environment.
+
         """
         self.call_async_ids(name, *args, **kwargs)
         return self.call_wait()
 
-    def call_async_ids(self, name: str, args_ids: list):
+    def call_async_ids(self, name: str, args_ids: list) -> None:
         """Calls the method with name asynchronously and
         Raises:
             ClosedEnvironmentError: If the environment was closed (if :meth:`close` was previously called).
-            AlreadyPendingCallError: Calling `call_async` while waiting for a pending call to complete
+            AlreadyPendingCallError: Calling `call_async` while waiting for a pending call to complete.
         """
         self._assert_is_running()
         if self._state != AsyncState.DEFAULT:
@@ -79,3 +68,26 @@ class AsyncVectorEnv(OriginalAsyncVectorEnv):
             kwargs = args_ids[i].get("kwargs", {})
             pipe.send(("_call", (name, args, kwargs)))
         self._state = AsyncState.WAITING_CALL
+
+
+def gym_vector_env_creator(
+    env_fns: list,
+    vectorization_mode: str,
+    vector_kwargs: dict | None = None,
+) -> SyncVectorEnv | AsyncVectorEnv:
+    """TODO: Fill."""
+    if vector_kwargs is None:
+        vector_kwargs = {}
+
+    if vectorization_mode == "async":
+        return AsyncVectorEnv(
+            env_fns=env_fns,
+            **vector_kwargs,
+        )
+    elif vectorization_mode == "sync":
+        return SyncVectorEnv(
+            env_fns=env_fns,
+            **vector_kwargs,
+        )
+    else:
+        raise ValueError(f"Invalid vectorization mode {vectorization_mode}.")
