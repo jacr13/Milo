@@ -116,8 +116,7 @@ install = "poetry install --no-root"
 install_nodev = "poetry install --no-root --no-dev"
 
 # test
-test = "pytest test --cov=tianshou --cov-report=xml --cov-report=term-missing --durations=0 -v --color=yes"
-test-reduced = "pytest test/base test/continuous --cov=tianshou --durations=0 -v --color=yes"
+test = "poetry run python -m pytest tests --cov=tianshou --cov-report=xml --cov-report=term-missing --durations=0 -v --color=yes"
 
 # lint
 black_check = "poetry run black --check ."
