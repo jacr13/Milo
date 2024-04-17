@@ -36,5 +36,5 @@ print(collector._pre_obs)
 
 collector.reset(seed=123)
 print(collector._pre_obs)
-
-collector.collect(n_step=10)
+print(collector.env_num)
+collector.collect(n_step=10, n_episode=1)
