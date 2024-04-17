@@ -1,71 +1,153 @@
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
 [tool.poetry]
 name = "milo"
 version = "0.1.0"
 description = ""
 authors = ["Joao A. Candido Ramos <joao.candido@etu.unige.ch>"]
 readme = "README.md"
+exclude = ["test/*", "examples/*", "docs/*"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
-# metaworld = {git = "https://github.com/Farama-Foundation/Metaworld.git", rev = "master"}
-metaworld = {git = "https://github.com/jacr13/Metaworld.git", rev = "fix-box-warning"} # until metaworld merges
 # gymnasium = "^0.29.1" # metaworld uses v1 not v0
 dm-control = "1.0.14" # last version before mujoco v3, mandatory for metaworld...
-
+# metaworld = {git = "https://github.com/Farama-Foundation/Metaworld.git", rev = "master"}
+metaworld = {git = "https://github.com/jacr13/Metaworld.git", rev = "fix-box-warning"} # until metaworld merges
+numpy = "^1"
 
 [tool.poetry.group.dev.dependencies]
-black = "^24.4.0"
+black = { version = "^24.4.0", extras = ["jupyter"] }
 isort = "^5.13.2"
-flake8 = "^7.0.0"
-pytest = "^8.1.1"
+mypy = "^1.9.0"
 poethepoet = "^0.25.1"
-flake8-pyproject = "^1.2.3"
+pre-commit = "^3.3.3"
+pytest = "*"
+pytest-cov = "*"
+ruff = "^0.3.7"
 
+[tool.mypy]
+allow_redefinition = true
+check_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+ignore_missing_imports = true
+no_implicit_optional = true
+pretty = true
+show_error_codes = true
+show_error_context = true
+show_traceback = true
+strict_equality = true
+strict_optional = true
+warn_no_return = true
+warn_redundant_casts = true
+warn_unreachable = true
+warn_unused_configs = true
+warn_unused_ignores = true
+exclude = "^build/|^docs/"
 
 [tool.black]
 line-length = 120
+target-version = ["py310"]
 
 [tool.isort]
 profile = "black"
 
-[tool.flake8]
-max-line-length = 120
-extend-ignore = ["E203","E701"]
+[tool.ruff]
+target-version = "py310"
 
-[tool.poe.tasks]
+[tool.ruff.lint]
+select = [
+    "ASYNC", "B", "C4", "C90", "COM", "D", "DTZ", "E", "F", "FLY", "G", "I", "ISC", "PIE", "PLC", "PLE", "PLW", "RET", "RUF", "RSE", "SIM", "TID", "UP", "W", "YTT",
+]
+ignore = [
+    "SIM118", # Needed b/c iter(batch) != iter(batch.keys()). See https://github.com/thu-ml/tianshou/issues/922
+    "E501", # line too long. black does a good enough job
+    "E741", # variable names like "l". this isn't a huge problem
+    "B008", # do not perform function calls in argument defaults. we do this sometimes
+    "B011", # assert false. we don't use python -O
+    "B028", # we don't need explicit stacklevel for warnings
+    "D100", "D101", "D102", "D104", "D105", "D107", "D203", "D213", "D401", "D402", # docstring stuff
+    "DTZ005", # we don't need that
+    # remaining rules from https://github.com/psf/black/blob/main/.flake8 (except W503)
+    # this is a simplified version of config, making vscode plugin happy
+    "E402", "E501", "E701", "E731", "C408", "E203",
+    # Logging statement uses f-string warning
+    "G004",
+    # Unnecessary `elif` after `return` statement
+    "RET505",
+    "D106", # undocumented public nested class
+    "D205", # blank line after summary (prevents summary-only docstrings, which makes no sense)
+    "PLW2901", # overwrite vars in loop
+]
+unfixable = [
+    "F841", # unused variable. ruff keeps the call, but mostly we want to get rid of it all
+    "F601", # automatic fix might obscure issue
+    "F602", # automatic fix might obscure issue
+    "B018", # automatic fix might obscure issue
+]
+extend-fixable = [
+    "F401", # unused import
+    "B905", # bugbear
+]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 20
+
+[tool.ruff.lint.per-file-ignores]
+"test/**" = ["D103"]
+"docs/**" = ["D103"]
+"examples/**" = ["D103"]
+
+[tool.poetry-sort]
+move-optionals-to-bottom = true
+
+
+# keep relevant parts in sync with pre-commit
+[tool.poe.tasks]  # https://github.com/nat-n/poethepoet
+# sort
+_poetry_install_sort_plugin = "poetry self add poetry-plugin-sort"
+_poetry_sort = "poetry sort"
+
 # install
 install = "poetry install --no-root"
 install_nodev = "poetry install --no-root --no-dev"
 
-# delete virtual environment
-delete_venv = "poetry env remove python"
+# test
+test = "pytest test --cov=tianshou --cov-report=xml --cov-report=term-missing --durations=0 -v --color=yes"
+test-reduced = "pytest test/base test/continuous --cov=tianshou --durations=0 -v --color=yes"
 
-# delete lock file
-delete_lock = "rm -f poetry.lock"
+# lint
+black_check = "poetry run black --check ."
+ruff_check = "poetry run ruff check ."
+lint = ["black_check", "ruff_check"]
 
-# recreate virtual environment
-reinstall = ["delete_lock", "delete_venv", "install"]
+# format
+isort_format = "poetry run isort ."
+black_format = "poetry run black ."
+ruff_format = "poetry run ruff check --fix ."
+format = ["isort_format", "black_format", "ruff_format", "_poetry_install_sort_plugin", "_poetry_sort"]
 
-# linting
-lint = "poetry run flake8 ."
+# type check
+mypy = "mypy milo"
+type-check = ["mypy"]
 
-# formating
-black = "poetry run black ."
-isort = "poetry run isort ."
-format = ["isort", "black"]
+# delete venv and lock
+_delete_venv = "poetry env remove python"
+_delete_lock = "rm -f poetry.lock"
+delete = ["_delete_lock", "_delete_venv"]
 
-# testing
-test = "poetry run python -m pytest"
+# reinstall of venv
+reinstall = ["delete", "install"]
 
-# cleaning generated files
+# cleaning
 clean = """
 rm -rf .coverage
         .mypy_cache
+        .ruff_cache
         .pytest_cache
         ./**/__pycache__
         dist
 """
-
-[build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
