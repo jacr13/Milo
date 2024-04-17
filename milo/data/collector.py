@@ -1,4 +1,4 @@
-# inspired from:
+# inspired from: https://github.com/aai-institute/tianshou/blob/master/tianshou/data/collector.py
 
 import time
 import warnings
@@ -26,7 +26,7 @@ class Collector:
 
         self.env_num = self.env.num_envs
         self.exploration_noise = exploration_noise
-        self.buffer = []  # TODO: buffer
+        self.buffer = None  # TODO: buffer
         self.policy = policy
 
         self.collect_step: int = 0
@@ -89,6 +89,25 @@ class Collector:
 
         self._pre_obs, self._pre_info = self.env.reset(**gym_reset_kwargs)
 
+    def _add_to_buffer(self, obs, actions, rewards, next_obs, terminated, truncated, info, pixels=None):
+        if self.buffer is None:
+            self.buffer = {
+                "obs": [],
+                "actions": [],
+                "rewards": [],
+                "next_obs": [],
+                "terminated": [],
+                "truncated": [],
+                "infos": [],
+            }
+        self.buffer["obs"].append(obs)
+        self.buffer["actions"].append(actions)
+        self.buffer["rewards"].append(rewards)
+        self.buffer["next_obs"].append(next_obs)
+        self.buffer["terminated"].append(terminated)
+        self.buffer["truncated"].append(truncated)
+        self.buffer["infos"].append(info)
+
     def _get_actions(self) -> np.ndarray:
         # TODO: implement with policy
         return self.env.action_space.sample()
@@ -123,20 +142,34 @@ class Collector:
         if reset_before_collect:
             self.reset(reset_buffer=False, gym_reset_kwargs=gym_reset_kwargs)
 
+        pixels = None
         obs = self._pre_obs
         step_count = 0
         num_collected_episodes = 0
         while True:
             actions = self._get_actions()
             next_obs, rewards, terminated, truncated, info = self.env.step(actions)
-            self.buffer.append([obs, actions, rewards, next_obs, terminated, truncated, info])
+
+            if render:
+                print("render")
+                pixels = self.env.render()
+                print("pixels", pixels.shape)
+
+            self._add_to_buffer(obs, actions, rewards, next_obs, terminated, truncated, info, pixels=pixels)
             obs = next_obs
+
             step_count += 1
             dones = terminated | truncated
             num_collected_episodes += sum(dones)
+
+            if n_step is not None and step_count >= n_step:
+                break
+            if n_episode is not None and num_collected_episodes >= n_episode:
+                break
 
         # generate statistics
         self.collect_step += step_count
         self.collect_episode += num_collected_episodes
         collect_time = max(time.time() - start_time, 1e-9)
         self.collect_time += collect_time
+

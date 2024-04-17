@@ -26,12 +26,9 @@ def make(
     wrappers: Sequence[Callable[[Env], Wrapper]] | None = None,
 ) -> gym.vector.VectorEnv:
     """Creates a dmc vectorized environment based on the given environment ID, number of environments, vectorization mode, environment specific arguments, vector arguments, and wrappers."""
-    if env_spec_kwargs is None:
-        env_spec_kwargs = {}
-    if vector_kwargs is None:
-        vector_kwargs = {}
-    if wrappers is None:
-        wrappers = []
+    env_spec_kwargs = env_spec_kwargs or {}
+    vector_kwargs = vector_kwargs or {}
+    wrappers = wrappers or []
 
     domain, task = env_id.split("-")
 
@@ -83,15 +80,13 @@ class DMC2Gym(Env):
         task: str,
         task_kwargs: dict | None = None,
         environment_kwargs: dict | None = None,
-        rendering: str = "egl",
+        rendering: str = "osmesa",
         render_height: int = 64,
         render_width: int = 64,
         render_camera_id: int = 0,
     ):
-        if environment_kwargs is None:
-            environment_kwargs = {}
-        if task_kwargs is None:
-            task_kwargs = {}
+        environment_kwargs = environment_kwargs or {}
+        task_kwargs = environment_kwargs or {}
 
         # TODO: this seems to be present before importing dm_control suite to avoid warning
         # for details see https://github.com/deepmind/dm_control

@@ -1,9 +1,15 @@
 from milo.data.collector import Collector
 from milo.env import make_env
+import numpy as np
 
 # gymnasium
-env = make_env("Humanoid-v5", num_envs=3, vectorization_mode="async", env_spec_kwargs={"render_mode": "rgb_array"})
+env = make_env("Humanoid-v5", num_envs=3, vectorization_mode="async")
 obs, info = env.reset(seed=13)
+imgs = env.render()
+action = env.action_space.sample()
+obs, rew, terminated, truncated, info = env.step(action)
+imgs = env.render()
+obs, rew, terminated, truncated, info = env.step(action)
 imgs = env.render()
 print(obs.shape, len(imgs), imgs[0].shape, imgs[1].shape, imgs[2].shape, type(info))
 
@@ -26,7 +32,7 @@ print()
 print()
 print()
 print()
-env = make_env("Humanoid-v5", num_envs=3, vectorization_mode="async", env_spec_kwargs={"render_mode": "rgb_array"})
+env = make_env("Humanoid-v5", num_envs=3, vectorization_mode="async")
 collector = Collector(env.action_space, env, buffer=None, exploration_noise=False)
 collector.reset(gym_reset_kwargs={"seed": 123})
 print(collector._pre_obs)
@@ -37,4 +43,12 @@ print(collector._pre_obs)
 collector.reset(seed=123)
 print(collector._pre_obs)
 print(collector.env_num)
-collector.collect(n_step=10)
+
+collector.collect(n_step=2000)
+print(np.stack(collector.buffer["obs"]).shape, len(collector.buffer["obs"]))
+print(collector.collect_time, collector.collect_step, collector.collect_episode)
+
+collector.reset(seed=123)
+collector.collect(n_step=1, render=True)
+print(np.stack(collector.buffer["obs"]).shape, len(collector.buffer["obs"]))
+print(collector.collect_time, collector.collect_step, collector.collect_episode)
