@@ -16,7 +16,7 @@ RUN pip install poetry
 # Prevend dmc rendering to crash at the end
 ENV DISABLE_RENDER_THREAD_OFFLOADING=true
 # render mujoco headless
-ENV MUJOCO_GL=osmea
+ENV MUJOCO_GL=osmesa
 
 # --------- dev ---------
 FROM base AS dev
