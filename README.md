@@ -5,7 +5,7 @@ Milo is a Python library designed to streamline reinforcement learning (RL) and 
 
 ## Installation
 
-To install Milo and its dependencies, you can use [Poetry](https://python-poetry.org/):
+To install Milo's dependencies, you can use [Poetry](https://python-poetry.org/):
 
 1. **Install Poetry**: If you haven't already installed Poetry, you can do so using pip:
    ```bash
