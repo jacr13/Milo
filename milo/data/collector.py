@@ -1,3 +1,5 @@
+# inspired from:
+
 import time
 import warnings
 from typing import Any
@@ -24,7 +26,7 @@ class Collector:
 
         self.env_num = self.env.num_envs
         self.exploration_noise = exploration_noise
-        self.buffer = buffer
+        self.buffer = []  # TODO: buffer
         self.policy = policy
 
         self.collect_step: int = 0
@@ -87,6 +89,10 @@ class Collector:
 
         self._pre_obs, self._pre_info = self.env.reset(**gym_reset_kwargs)
 
+    def _get_actions(self) -> np.ndarray:
+        # TODO: implement with policy
+        return self.env.action_space.sample()
+
     def collect(
         self,
         n_step: int | None = None,
@@ -117,10 +123,17 @@ class Collector:
         if reset_before_collect:
             self.reset(reset_buffer=False, gym_reset_kwargs=gym_reset_kwargs)
 
-        # TODO: implement
-        # https://raw.githubusercontent.com/aai-institute/tianshou/master/tianshou/data/collector.py
-        step_count = 1
-        num_collected_episodes = 1
+        obs = self._pre_obs
+        step_count = 0
+        num_collected_episodes = 0
+        while True:
+            actions = self._get_actions()
+            next_obs, rewards, terminated, truncated, info = self.env.step(actions)
+            self.buffer.append([obs, actions, rewards, next_obs, terminated, truncated, info])
+            obs = next_obs
+            step_count += 1
+            dones = terminated | truncated
+            num_collected_episodes += sum(dones)
 
         # generate statistics
         self.collect_step += step_count
