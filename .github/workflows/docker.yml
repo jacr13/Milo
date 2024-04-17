@@ -1,3 +1,4 @@
+# Docker GitHub Action configuration file
 ---
 
 name: Docker
