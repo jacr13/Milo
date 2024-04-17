@@ -20,8 +20,8 @@ class Collector:
             warnings.warn("Single environment detected, wrap to SyncVectorEnv.")
             self.env = SyncVectorEnv([lambda: env])
         else:
-            self.env = env # type: ignore
- 
+            self.env = env  # type: ignore
+
         self.env_num = self.env.num_envs
         self.exploration_noise = exploration_noise
         self.buffer = buffer
@@ -96,9 +96,21 @@ class Collector:
         no_grad: bool = True,
         reset_before_collect: bool = False,
         gym_reset_kwargs: dict[str, Any] | None = None,
-    ):
+    ) -> None:
         if (n_step is not None and n_episode is not None) or (n_step is None and n_episode is None):
-            raise ValueError("Either n_step or n_episode must be specified (but not both or none)")
+            raise ValueError(
+                f"Either n_step or n_episode must be specified (but not both or none), but got {n_step=}, {n_episode=}.",
+            )
+        if n_step is not None:
+            assert n_step > 0, f"n_step must be positive, but got {n_step=}."
+        if n_episode is not None:
+            assert n_episode > 0, f"n_episode must be positive, but got {n_episode=}."
+
+        if n_episode is not None and n_episode < self.env_num:
+            warnings.warn(
+                "You are trying to collect fewer episodes than the number of environments. "
+                f"Got {n_episode=}, while the number of environments is {self.env_num}.",
+            )
 
         start_time = time.time()
 
@@ -106,6 +118,7 @@ class Collector:
             self.reset(reset_buffer=False, gym_reset_kwargs=gym_reset_kwargs)
 
         # TODO: implement
+        # https://raw.githubusercontent.com/aai-institute/tianshou/master/tianshou/data/collector.py
         step_count = 1
         num_collected_episodes = 1
 
