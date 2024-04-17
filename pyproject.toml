@@ -152,3 +152,5 @@ rm -rf .coverage
         ./**/__pycache__
         dist
 """
+
+debug = "poetry run python main.py"
