@@ -4,14 +4,14 @@ from typing import Any
 
 import gymnasium as gym
 import numpy as np
-from gymnasium.vector.sync_vector_env import SyncVectorEnv
+from gymnasium.vector import SyncVectorEnv, VectorEnv
 
 
 class Collector:
     def __init__(
         self,
         policy: None,
-        env: gym.Env | gym.vector.VectorEnv,
+        env: gym.Env | VectorEnv,
         buffer: None = None,
         exploration_noise: bool = False,
     ) -> None:
@@ -20,12 +20,16 @@ class Collector:
             warnings.warn("Single environment detected, wrap to SyncVectorEnv.")
             self.env = SyncVectorEnv([lambda: env])
         else:
-            self.env = env
-
-        self.env_num = len(self.env.env_fns)
+            self.env = env # type: ignore
+ 
+        self.env_num = self.env.num_envs
         self.exploration_noise = exploration_noise
         self.buffer = buffer
         self.policy = policy
+
+        self.collect_step: int = 0
+        self.collect_episode: int = 0
+        self.collect_time: float = 0.0
 
         self._action_space = self.env.action_space
         self._pre_obs: np.ndarray | None = None
@@ -65,6 +69,7 @@ class Collector:
 
     def reset_buffer(self, keep_statistics: bool = False) -> None:
         """Reset the data buffer."""
+        # TODO: reset buffer
 
     def reset_env(
         self,
@@ -82,7 +87,6 @@ class Collector:
 
         self._pre_obs, self._pre_info = self.env.reset(**gym_reset_kwargs)
 
-    # TODO: reduce complexity, remove the noqa
     def collect(
         self,
         n_step: int | None = None,
@@ -93,6 +97,9 @@ class Collector:
         reset_before_collect: bool = False,
         gym_reset_kwargs: dict[str, Any] | None = None,
     ):
+        if (n_step is not None and n_episode is not None) or (n_step is None and n_episode is None):
+            raise ValueError("Either n_step or n_episode must be specified (but not both or none)")
+
         start_time = time.time()
 
         if reset_before_collect:
