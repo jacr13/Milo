@@ -3,6 +3,7 @@ import warnings
 from typing import Any
 
 import gymnasium as gym
+import numpy as np
 from gymnasium.vector.sync_vector_env import SyncVectorEnv
 
 
@@ -98,3 +99,11 @@ class Collector:
             self.reset(reset_buffer=False, gym_reset_kwargs=gym_reset_kwargs)
 
         # TODO: implement
+        step_count = 1
+        num_collected_episodes = 1
+
+        # generate statistics
+        self.collect_step += step_count
+        self.collect_episode += num_collected_episodes
+        collect_time = max(time.time() - start_time, 1e-9)
+        self.collect_time += collect_time
