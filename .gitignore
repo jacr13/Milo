@@ -172,7 +172,7 @@ celerybeat.pid
 *.sage.py
 
 # Environments
-.env
+# .env  # used to specify mujoco env variables
 .venv
 # env/  # used in the project so commented here
 venv/
