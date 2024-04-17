@@ -54,7 +54,7 @@ def find_simulator(env_id: str) -> str | None:
     try:
         import gymnasium as gym
 
-        if env_id in gym.envs.registry.keys():
+        if env_id in gym.envs.registry:
             return "gymnasium"
     except ModuleNotFoundError:
         pass
