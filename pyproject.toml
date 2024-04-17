@@ -59,11 +59,11 @@ profile = "black"
 target-version = "py310"
 
 [tool.ruff.lint]
+# from: https://github.com/aai-institute/tianshou
 select = [
     "ASYNC", "B", "C4", "C90", "COM", "D", "DTZ", "E", "F", "FLY", "G", "I", "ISC", "PIE", "PLC", "PLE", "PLW", "RET", "RUF", "RSE", "SIM", "TID", "UP", "W", "YTT",
 ]
 ignore = [
-    "SIM118", # Needed b/c iter(batch) != iter(batch.keys()). See https://github.com/thu-ml/tianshou/issues/922
     "E501", # line too long. black does a good enough job
     "E741", # variable names like "l". this isn't a huge problem
     "B008", # do not perform function calls in argument defaults. we do this sometimes
@@ -116,7 +116,7 @@ install = "poetry install --no-root"
 install_nodev = "poetry install --no-root --no-dev"
 
 # test
-test = "poetry run python -m pytest tests --cov=tianshou --cov-report=xml --cov-report=term-missing --durations=0 -v --color=yes"
+test = "poetry run python -m pytest tests --cov=milo --cov-report=xml --cov-report=term-missing --durations=0 -v --color=yes"
 
 # lint
 black_check = "poetry run black --check ."
@@ -144,6 +144,8 @@ reinstall = ["delete", "install"]
 # cleaning
 clean = """
 rm -rf .coverage
+        htmlcov
+        coverage.xml
         .mypy_cache
         .ruff_cache
         .pytest_cache
