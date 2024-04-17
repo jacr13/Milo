@@ -1,6 +1,7 @@
+import numpy as np
+
 from milo.data.collector import Collector
 from milo.env import make_env
-import numpy as np
 
 # gymnasium
 env = make_env("Humanoid-v5", num_envs=3, vectorization_mode="async")

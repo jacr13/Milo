@@ -172,4 +172,3 @@ class Collector:
         self.collect_episode += num_collected_episodes
         collect_time = max(time.time() - start_time, 1e-9)
         self.collect_time += collect_time
-
