@@ -1,3 +1,4 @@
+# --------- base ---------
 FROM dmml/conda:ubt20.04-py310 AS base
 
 WORKDIR /
@@ -10,6 +11,12 @@ RUN apt-get update -q \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 RUN pip install poetry
+
+# env variables
+# Prevend dmc rendering to crash at the end
+ENV DISABLE_RENDER_THREAD_OFFLOADING=true
+# render mujoco headless
+ENV MUJOCO_GL=osmea
 
 # --------- dev ---------
 FROM base AS dev
