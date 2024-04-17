@@ -12,6 +12,7 @@ on:
     paths:
       - Dockerfile
       - pyproject.toml
+      - poetry.lock
       - .github/workflows/docker.yml
 
 concurrency:

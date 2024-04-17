@@ -55,4 +55,4 @@ jobs:
         run: poetry install --no-interaction --no-root
 
       - name: Run tests
-        run: poetry run python -m pytest
+        run: poetry run poe test
