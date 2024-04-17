@@ -5,34 +5,33 @@ import numpy as np
 # gymnasium
 env = make_env("Humanoid-v5", num_envs=3, vectorization_mode="async")
 obs, info = env.reset(seed=13)
-imgs = env.render()
-action = env.action_space.sample()
-obs, rew, terminated, truncated, info = env.step(action)
-imgs = env.render()
-obs, rew, terminated, truncated, info = env.step(action)
-imgs = env.render()
-print(obs.shape, len(imgs), imgs[0].shape, imgs[1].shape, imgs[2].shape, type(info))
+for i in range(100):
+    obs, _, _, _, _ = env.step(env.action_space.sample())
+    imgs = env.render()
+print(i, obs.shape, len(imgs), imgs[0].shape, imgs[1].shape, imgs[2].shape)
 
 # metaworld
 env = make_env("button-press-topdown-v2", num_envs=2, vectorization_mode="sync")
 obs, info = env.reset(seed=13)
-imgs = env.render()
-print(obs.shape, len(imgs), imgs[0].shape, imgs[1].shape)
+for i in range(3):
+    obs, _, _, _, _ = env.step(env.action_space.sample())
+    imgs = env.render()
+print(i, obs.shape, len(imgs), imgs[0].shape, imgs[1].shape)
 
 # dmc
 env = make_env("walker-walk", num_envs=3, vectorization_mode="sync")
 obs, info = env.reset(seed=13)
-for i in range(10):
+for i in range(100):
     obs, _, _, _, _ = env.step(env.action_space.sample())
     imgs = env.render()
-    print(i, obs.shape, len(imgs), imgs[0].shape, imgs[1].shape, imgs[2].shape)
+print(i, obs.shape, len(imgs), imgs[0].shape, imgs[1].shape, imgs[2].shape)
 
 
 print()
 print()
 print()
 print()
-env = make_env("Humanoid-v5", num_envs=3, vectorization_mode="async")
+env = make_env("walker-walk", num_envs=3, vectorization_mode="async")
 collector = Collector(env.action_space, env, buffer=None, exploration_noise=False)
 collector.reset(gym_reset_kwargs={"seed": 123})
 print(collector._pre_obs)

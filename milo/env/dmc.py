@@ -81,8 +81,8 @@ class DMC2Gym(Env):
         task_kwargs: dict | None = None,
         environment_kwargs: dict | None = None,
         rendering: str = "osmesa",
-        render_height: int = 64,
-        render_width: int = 64,
+        render_height: int = 480,
+        render_width: int = 480,
         render_camera_id: int = 0,
     ):
         environment_kwargs = environment_kwargs or {}
