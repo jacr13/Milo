@@ -138,7 +138,7 @@ class Collector:
 
         if self._pre_obs is None:
             raise ValueError("The environment must be reset before collecting.")
-        
+
         obs = self._pre_obs
         pixels = None
 
@@ -147,7 +147,7 @@ class Collector:
 
         while True:
             actions = self._get_actions()
-            next_obs, rewards, terminated, truncated, info = self.env.step(actions) # type: ignore
+            next_obs, rewards, terminated, truncated, info = self.env.step(actions)  # type: ignore
             done = terminated | truncated
 
             if render:

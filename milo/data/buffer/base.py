@@ -2,8 +2,9 @@ import random
 
 from milo.data.transition import Transition
 
+
 class ReplayBuffer:
-    def __init__(self, capacity: int)->None:
+    def __init__(self, capacity: int) -> None:
         self.capacity = capacity
         self.buffer: list = []
         self.reset()
