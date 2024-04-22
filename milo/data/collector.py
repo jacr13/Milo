@@ -17,7 +17,7 @@ class Collector:
         self,
         policy: None,
         env: gym.Env | VectorEnv,
-        buffer: None = None,
+        buffer: ReplayBuffer | None = None,
         exploration_noise: bool = False,
     ) -> None:
         super().__init__()
@@ -53,7 +53,7 @@ class Collector:
         """Return True if the collector is closed."""
         return self._is_closed
 
-    def _setup_buffer(self, buffer: None) -> None:
+    def _setup_buffer(self, buffer: ReplayBuffer | None) -> ReplayBuffer:
         if buffer is None:
             return ReplayBuffer(1000000)
         else:
@@ -136,13 +136,18 @@ class Collector:
         if reset_before_collect:
             self.reset(reset_buffer=False, gym_reset_kwargs=gym_reset_kwargs)
 
-        pixels = None
+        if self._pre_obs is None:
+            raise ValueError("The environment must be reset before collecting.")
+        
         obs = self._pre_obs
-        step_count = 0
-        num_collected_episodes = 0
+        pixels = None
+
+        step_count: int = 0
+        num_collected_episodes: int = 0
+
         while True:
             actions = self._get_actions()
-            next_obs, rewards, terminated, truncated, info = self.env.step(actions)
+            next_obs, rewards, terminated, truncated, info = self.env.step(actions) # type: ignore
             done = terminated | truncated
 
             if render:

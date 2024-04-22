@@ -1,23 +1,23 @@
 import random
 
+from milo.data.transition import Transition
 
 class ReplayBuffer:
-    def __init__(self, capacity):
+    def __init__(self, capacity: int)->None:
         self.capacity = capacity
-        self.buffer = []
-        self.position = 0
+        self.buffer: list = []
         self.reset()
 
-    def reset(self):
+    def reset(self) -> None:
         self.buffer = []
 
-    def push(self, transition):
+    def push(self, transition: Transition) -> None:
         if len(self.buffer) >= self.capacity:
             self.buffer.pop(0)  # Remove the first element
         self.buffer.append(transition)
 
-    def sample(self, batch_size):
+    def sample(self, batch_size: int) -> list:
         return random.sample(self.buffer, batch_size)
 
-    def __len__(self):
+    def __len__(self) -> int:
         return len(self.buffer)
