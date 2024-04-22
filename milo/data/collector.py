@@ -8,6 +8,9 @@ import gymnasium as gym
 import numpy as np
 from gymnasium.vector import SyncVectorEnv, VectorEnv
 
+from milo.data.buffer.base import ReplayBuffer
+from milo.data.transition import Transition
+
 
 class Collector:
     def __init__(
@@ -26,7 +29,7 @@ class Collector:
 
         self.env_num = self.env.num_envs
         self.exploration_noise = exploration_noise
-        self.buffer = None  # TODO: buffer
+        self.buffer = self._setup_buffer(buffer)
         self.policy = policy
 
         self.collect_step: int = 0
@@ -50,6 +53,12 @@ class Collector:
         """Return True if the collector is closed."""
         return self._is_closed
 
+    def _setup_buffer(self, buffer: None) -> None:
+        if buffer is None:
+            return ReplayBuffer(1000000)
+        else:
+            return buffer
+
     def reset(
         self,
         reset_buffer: bool = True,
@@ -71,7 +80,7 @@ class Collector:
 
     def reset_buffer(self, keep_statistics: bool = False) -> None:
         """Reset the data buffer."""
-        # TODO: reset buffer
+        self.buffer.reset()
 
     def reset_env(
         self,
@@ -89,24 +98,9 @@ class Collector:
 
         self._pre_obs, self._pre_info = self.env.reset(**gym_reset_kwargs)
 
-    def _add_to_buffer(self, obs, actions, rewards, next_obs, terminated, truncated, info, pixels=None):
-        if self.buffer is None:
-            self.buffer = {
-                "obs": [],
-                "actions": [],
-                "rewards": [],
-                "next_obs": [],
-                "terminated": [],
-                "truncated": [],
-                "infos": [],
-            }
-        self.buffer["obs"].append(obs)
-        self.buffer["actions"].append(actions)
-        self.buffer["rewards"].append(rewards)
-        self.buffer["next_obs"].append(next_obs)
-        self.buffer["terminated"].append(terminated)
-        self.buffer["truncated"].append(truncated)
-        self.buffer["infos"].append(info)
+    def _add_to_buffer(self, transition: Transition) -> None:
+        if self.buffer is not None:
+            self.buffer.push(transition)
 
     def _get_actions(self) -> np.ndarray:
         # TODO: implement with policy
@@ -149,18 +143,18 @@ class Collector:
         while True:
             actions = self._get_actions()
             next_obs, rewards, terminated, truncated, info = self.env.step(actions)
+            done = terminated | truncated
 
             if render:
-                print("render")
                 pixels = self.env.render()
-                print("pixels", pixels.shape)
 
-            self._add_to_buffer(obs, actions, rewards, next_obs, terminated, truncated, info, pixels=pixels)
+            transition = Transition(obs, actions, rewards, next_obs, done, terminated, truncated, info, pixels)
+            self._add_to_buffer(transition)
+
             obs = next_obs
 
             step_count += 1
-            dones = terminated | truncated
-            num_collected_episodes += sum(dones)
+            num_collected_episodes += sum(done)
 
             if n_step is not None and step_count >= n_step:
                 break

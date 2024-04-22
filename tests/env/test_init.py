@@ -59,6 +59,7 @@ env_configs = [
 
 class TestMakeEnv:
     """Tests for the make_env function."""
+
     @pytest.mark.parametrize("env_config", env_configs)
     def test_create_environment(self, env_config):
         for env_id in ["CartPole-v1", "button-press-topdown-v2", "walker-walk"]:
@@ -81,7 +82,7 @@ class TestMakeEnv:
             env_config_copy = copy.deepcopy(env_config)
             env_type = env_config_copy.pop("env_type")
             num_envs = env_config_copy["num_envs"]
-        
+
             env = make_env(env_id, **env_config_copy)
 
             reset_result = env.reset(seed=13)

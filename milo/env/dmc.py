@@ -40,16 +40,16 @@ def make(
 def _spec_to_box(spec: OrderedDict | list, dtype: type = np.float32) -> Box:
     """Converts a specification of observation or action space to a gym Box space."""
 
-    def extract_min_max(s: np.ndarray) -> tuple:
-        """Takes a numpy array and return the minimum and maximum values based on the type."""
+    def extract_min_max(s: specs.Array) -> tuple:
+        """Takes a specs array and return the minimum and maximum values based on the type."""
         assert s.dtype == np.float64 or s.dtype == np.float32
         dim = int(np.prod(s.shape))
-        if isinstance(s, specs.Array):
-            bound = np.inf * np.ones(dim, dtype=np.float32)
-            return -bound, bound
-        elif isinstance(s, specs.BoundedArray):
+        if isinstance(s, specs.BoundedArray):
             zeros = np.zeros(dim, dtype=np.float32)
             return s.minimum + zeros, s.maximum + zeros
+        elif isinstance(s, specs.Array):
+            bound = np.inf * np.ones(dim, dtype=np.float32)
+            return -bound, bound
         else:
             logging.error("Unrecognized type")
             return None, None
@@ -80,13 +80,14 @@ class DMC2Gym(Env):
         task: str,
         task_kwargs: dict | None = None,
         environment_kwargs: dict | None = None,
+        render_mode: str = "rgb_array",
         rendering: str = "osmesa",
         render_height: int = 222,
         render_width: int = 480,
         render_camera_id: int = 0,
     ):
         environment_kwargs = environment_kwargs or {}
-        task_kwargs = environment_kwargs or {}
+        task_kwargs = task_kwargs or {}
 
         # TODO: this seems to be present before importing dm_control suite to avoid warning
         # for details see https://github.com/deepmind/dm_control
@@ -101,7 +102,7 @@ class DMC2Gym(Env):
         )
 
         # placeholder to allow built in gymnasium rendering
-        self.render_mode = "rgb_array"
+        self.render_mode = render_mode
         self.render_height = render_height
         self.render_width = render_width
         self.render_camera_id = render_camera_id
@@ -111,7 +112,7 @@ class DMC2Gym(Env):
 
         # set seed if provided with task_kwargs
         if "random" in task_kwargs:
-            seed = task_kwargs["random"]
+            seed = task_kwargs.get("random")
             self._observation_space.seed(seed)
             self._action_space.seed(seed)
 
@@ -153,9 +154,16 @@ class DMC2Gym(Env):
             logging.warning(f"Currently doing nothing with options={options}")
 
         if seed is not None:
+            if isinstance(seed, int):
+                # seed also in the action and observation space
+                self._observation_space.seed(seed)
+                self._action_space.seed(seed)
+
             if not isinstance(seed, np.random.RandomState):
                 seed = np.random.RandomState(seed)
             self._env.task._random = seed
+        
+
 
         timestep = self._env.reset()
         observation = _flatten_obs(timestep.observation)
