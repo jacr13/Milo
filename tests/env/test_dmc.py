@@ -83,6 +83,7 @@ def test_seed_task_kwargs_action_space():
 
 
 def test_seed_task_kwargs_observation_space():
+    """Function to test sampling from the observation space with different task kwargs."""
     env = DMC2Gym(domain="cartpole", task="swingup", task_kwargs={"random": 13})
     obs_13 = env.observation_space.sample()
 
