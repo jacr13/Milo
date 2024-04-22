@@ -58,8 +58,7 @@ def gym_vector_env_creator(
     vector_kwargs: dict | None = None,
 ) -> SyncVectorEnv | AsyncVectorEnv:
     """Create a vectorized environment from a list of environment functions based on the specified vectorization mode."""
-    if vector_kwargs is None:
-        vector_kwargs = {}
+    vector_kwargs = vector_kwargs or {}
 
     if vectorization_mode == "async":
         return AsyncVectorEnv(

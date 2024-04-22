@@ -14,12 +14,13 @@ def make(
     wrappers: Sequence[Callable[[Env], Wrapper]] | None = None,
 ) -> gym.vector.VectorEnv:
     """Creates a gym vectorized environment based on the given environment ID, number of environments, vectorization mode, environment specific arguments, vector arguments, and wrappers."""
-    if env_spec_kwargs is None:
-        env_spec_kwargs = {}
-    if vector_kwargs is None:
-        vector_kwargs = {}
-    if wrappers is None:
-        wrappers = []
+    env_spec_kwargs = env_spec_kwargs or {}
+    vector_kwargs = vector_kwargs or {}
+    wrappers = wrappers or []
+
+    # Set default render mode
+    if "render_mode" not in env_spec_kwargs:
+        env_spec_kwargs["render_mode"] = "rgb_array"
 
     return gym.make_vec(
         env_id,
