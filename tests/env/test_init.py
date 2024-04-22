@@ -80,7 +80,7 @@ class TestMakeEnv:
     def test_reset_seed_step_environment(self, env_config):
         for env_id in ["CartPole-v1", "button-press-topdown-v2", "walker-walk"]:
             env_config_copy = copy.deepcopy(env_config)
-            env_type = env_config_copy.pop("env_type")
+            _ = env_config_copy.pop("env_type")
             num_envs = env_config_copy["num_envs"]
 
             env = make_env(env_id, **env_config_copy)

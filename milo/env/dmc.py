@@ -162,8 +162,6 @@ class DMC2Gym(Env):
             if not isinstance(seed, np.random.RandomState):
                 seed = np.random.RandomState(seed)
             self._env.task._random = seed
-        
-
 
         timestep = self._env.reset()
         observation = _flatten_obs(timestep.observation)
