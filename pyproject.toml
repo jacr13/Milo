@@ -155,4 +155,4 @@ rm -rf .coverage
 """
 
 debug = "poetry run python main.py"
-docker = "docker run --rm -v .:/workspace dmml/milo:latest python main.py"
+docker = "docker run --rm -v .:/workspace dmml/milo:latest bash"
