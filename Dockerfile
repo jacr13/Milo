@@ -10,13 +10,7 @@ RUN apt-get update -q \
     && apt-get autoremove -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
-RUN pip install poetry
-
-# env variables
-# Prevend dmc rendering to crash at the end
-ENV DISABLE_RENDER_THREAD_OFFLOADING=true
-# render mujoco headless
-ENV MUJOCO_GL=osmesa
+RUN pip install poetry && poetry self add poetry-dotenv-plugin
 
 # --------- dev ---------
 FROM base AS dev
