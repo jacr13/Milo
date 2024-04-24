@@ -23,7 +23,7 @@ jobs:
       - name: Get Python version
         id: python_version
         run: |
-          python_version="$(python --version 2>&1 | awk '{print "$2"}')"
+          python_version="$(python --version 2>&1 | awk '{print $2}')"
           echo PYTHON_VERSION="$python_version" >> "$GITHUB_ENV"
 
       - name: Get Poetry version
