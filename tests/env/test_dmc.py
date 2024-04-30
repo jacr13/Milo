@@ -41,12 +41,14 @@ def test_seed_reset(dmc_env):
 
 
 def test_render(dmc_env):
+    dmc_env.reset()
     render_frame = dmc_env.render()
     assert isinstance(render_frame, np.ndarray)
     assert render_frame.shape == (dmc_env.render_height, dmc_env.render_width, 3)
 
 
 def test_render_size(dmc_env):
+    dmc_env.reset()
     render_frame = dmc_env.render(height=100, width=200)
     assert render_frame.shape == (100, 200, 3)
 
@@ -58,6 +60,7 @@ def test_getattr(dmc_env):
 
 
 def test_invalid_action(dmc_env):
+    dmc_env.reset()
     action = np.ones(dmc_env.action_space.shape) * 10
     with pytest.raises(AssertionError):
         dmc_env.step(action)
