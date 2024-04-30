@@ -11,12 +11,12 @@ To install Milo's dependencies, you can use [Poetry](https://python-poetry.org/)
 
    - **poetry-plugin-sort**: for organizing your dependencies efficiently.
    - **poetry-dotenv-plugin**: to handle .env files seamlessly.
-   - **Poe the Poet**: for a collection of development commands that streamline your development process. You can find more information about Poe the Poet [here](https://poethepoet.natn.io/index.html).
+   - **Poe the Poet (Dev dependency)**: for a collection of development commands that streamline your development process. You can find more information about Poe the Poet [here](https://poethepoet.natn.io/index.html).
 
    To install Poetry and these plugins, simply run the following command in your terminal:
 
    ```bash
-   pip install poetry poetry-plugin-sort poetry-dotenv-plugin poethepoet
+   pip install poetry poetry-plugin-sort poetry-dotenv-plugin
    ```
 
 2. **Install Dependencies**: Navigate to the root directory of Milo and run the following command to install dependencies (excluding Milo itself):
