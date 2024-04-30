@@ -49,7 +49,7 @@ class AsyncVectorEnv(OriginalAsyncVectorEnv):
             args = args_ids[i].get("args", [])
             kwargs = args_ids[i].get("kwargs", {})
             pipe.send(("_call", (name, args, kwargs)))
-        self._state = AsyncState.WAITING_CALL
+        self._state: AsyncState = AsyncState.WAITING_CALL
 
 
 def gym_vector_env_creator(
