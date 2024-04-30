@@ -109,7 +109,6 @@ move-optionals-to-bottom = true
 # keep relevant parts in sync with pre-commit
 [tool.poe.tasks]  # https://github.com/nat-n/poethepoet
 # sort
-_poetry_install_sort_plugin = "poetry self add poetry-plugin-sort"
 _poetry_sort = "poetry sort"
 
 # install
@@ -128,7 +127,7 @@ lint = ["black_check", "ruff_check"]
 isort_format = "poetry run isort ."
 black_format = "poetry run black ."
 ruff_format = "poetry run ruff check --fix ."
-format = ["isort_format", "black_format", "ruff_format", "_poetry_install_sort_plugin", "_poetry_sort"]
+format = ["isort_format", "black_format", "ruff_format", "_poetry_sort"]
 
 # type check
 mypy = "mypy milo"
