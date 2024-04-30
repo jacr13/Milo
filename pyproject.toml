@@ -23,7 +23,6 @@ black = { version = "^24.4.0", extras = ["jupyter"] }
 isort = "^5.13.2"
 mypy = "^1.9.0"
 poethepoet = "^0.25.1"
-pre-commit = "^3.3.3"
 pytest = "*"
 pytest-cov = "*"
 ruff = "^0.3.7"
@@ -45,8 +44,8 @@ warn_no_return = true
 warn_redundant_casts = true
 warn_unreachable = true
 warn_unused_configs = true
-warn_unused_ignores = true
-exclude = "^build/|^docs/"
+warn_unused_ignores = false
+exclude = "^tests/|^build/|^docs/"
 
 [tool.black]
 line-length = 120
@@ -57,6 +56,7 @@ profile = "black"
 
 [tool.ruff]
 target-version = "py310"
+exclude = ["docs", "tests"]
 
 [tool.ruff.lint]
 # from: https://github.com/aai-institute/tianshou
@@ -108,7 +108,6 @@ move-optionals-to-bottom = true
 # keep relevant parts in sync with pre-commit
 [tool.poe.tasks]  # https://github.com/nat-n/poethepoet
 # sort
-_poetry_install_sort_plugin = "poetry self add poetry-plugin-sort"
 _poetry_sort = "poetry sort"
 
 # install
@@ -127,11 +126,11 @@ lint = ["black_check", "ruff_check"]
 isort_format = "poetry run isort ."
 black_format = "poetry run black ."
 ruff_format = "poetry run ruff check --fix ."
-format = ["isort_format", "black_format", "ruff_format", "_poetry_install_sort_plugin", "_poetry_sort"]
+format = ["isort_format", "black_format", "ruff_format", "_poetry_sort"]
 
 # type check
 mypy = "mypy milo"
-type-check = ["mypy"]
+type_check = ["mypy"]
 
 # delete venv and lock
 _delete_venv = "poetry env remove python"
@@ -152,3 +151,6 @@ rm -rf .coverage
         ./**/__pycache__
         dist
 """
+
+debug = "poetry run python main.py"
+docker = "docker run --rm -it -v .:/workspace dmml/milo:latest bash"

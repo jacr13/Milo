@@ -49,7 +49,7 @@ class AsyncVectorEnv(OriginalAsyncVectorEnv):
             args = args_ids[i].get("args", [])
             kwargs = args_ids[i].get("kwargs", {})
             pipe.send(("_call", (name, args, kwargs)))
-        self._state = AsyncState.WAITING_CALL
+        self._state: AsyncState = AsyncState.WAITING_CALL
 
 
 def gym_vector_env_creator(
@@ -58,8 +58,7 @@ def gym_vector_env_creator(
     vector_kwargs: dict | None = None,
 ) -> SyncVectorEnv | AsyncVectorEnv:
     """Create a vectorized environment from a list of environment functions based on the specified vectorization mode."""
-    if vector_kwargs is None:
-        vector_kwargs = {}
+    vector_kwargs = vector_kwargs or {}
 
     if vectorization_mode == "async":
         return AsyncVectorEnv(

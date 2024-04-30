@@ -18,14 +18,10 @@ def make(
     wrappers: Sequence[Callable[[Env], Wrapper]] | None = None,
 ) -> gym.vector.VectorEnv:
     """Creates a metaworld vectorized environment based on the given environment ID, number of environments, vectorization mode, environment specific arguments, vector arguments, and wrappers."""
-    if env_spec_kwargs is None:
-        env_spec_kwargs = {}
-    if vector_kwargs is None:
-        vector_kwargs = {}
-    if wrappers is None:
-        wrappers = []
-
-    render_mode = env_spec_kwargs.get("render_mode", "rgb_array")
+    env_spec_kwargs = env_spec_kwargs or {}
+    vector_kwargs = vector_kwargs or {}
+    wrappers = wrappers or []
+    render_mode = env_spec_kwargs.pop("render_mode", "rgb_array")
 
     ml1 = metaworld.ML1(env_id)
     env_fns = [lambda: ml1.train_classes[env_id](render_mode=render_mode, **env_spec_kwargs) for _ in range(num_envs)]

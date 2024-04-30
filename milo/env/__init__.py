@@ -17,12 +17,9 @@ def make_env(
     wrappers: Sequence[Callable[[Env], Wrapper]] | None = None,
 ) -> gym.vector.VectorEnv:
     """Creates a vectorized environment based on the provided parameters."""
-    if env_spec_kwargs is None:
-        env_spec_kwargs = {}
-    if vector_kwargs is None:
-        vector_kwargs = {}
-    if wrappers is None:
-        wrappers = []
+    env_spec_kwargs = env_spec_kwargs or {}
+    vector_kwargs = vector_kwargs or {}
+    wrappers = wrappers or []
 
     # f simulator is not provided, attempt to detect simulator automatically
     if simulator is None:

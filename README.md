@@ -7,16 +7,16 @@ Milo is a Python library designed to streamline reinforcement learning (RL) and 
 
 To install Milo's dependencies, you can use [Poetry](https://python-poetry.org/):
 
-1. **Install Poetry**: If you haven't already installed Poetry, you can do so using pip:
-   ```bash
-   pip install poetry
-   # install the plugin to handle .env files automatically
-   poetry self add poetry-dotenv-plugin
-   ```
+1. **Install Poetry**: If you haven't installed Poetry yet, you can easily do so using pip. Additionally, we recommend installing the following plugins for enhanced functionality:
 
-   Additionally, we provide a set of development commands to streamline the development process. To use these commands, you'll also need to install [Poe the Poet](https://poethepoet.natn.io/index.html):
+   - **poetry-plugin-sort**: for organizing your dependencies efficiently.
+   - **poetry-dotenv-plugin**: to handle .env files seamlessly.
+   - **Poe the Poet (Dev dependency)**: for a collection of development commands that streamline your development process. You can find more information about Poe the Poet [here](https://poethepoet.natn.io/index.html).
+
+   To install Poetry and these plugins, simply run the following command in your terminal:
+
    ```bash
-   pip install poethepoet
+   pip install poetry poetry-plugin-sort poetry-dotenv-plugin
    ```
 
 2. **Install Dependencies**: Navigate to the root directory of Milo and run the following command to install dependencies (excluding Milo itself):
