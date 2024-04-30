@@ -38,15 +38,15 @@ jobs:
       - uses: chartboost/ruff-action@v1
 
   type_check:
+    name: Type Check
     runs-on: ubuntu-latest
-    container: candidj0/milo:base
 
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v4
-
-      - name: Install dependencies
-        run: poetry run pip install mypy
-
-      - name: Run type-check
-        run: poetry run poe type-check
+      - uses: actions/checkout@v4
+      - name: Set up Python environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - run: pip install poetry
+      - run: poetry run pip install poethepoet mypy
+      - run: poetry run poe type_check
