@@ -23,7 +23,6 @@ black = { version = "^24.4.0", extras = ["jupyter"] }
 isort = "^5.13.2"
 mypy = "^1.9.0"
 poethepoet = "^0.25.1"
-pre-commit = "^3.3.3"
 pytest = "*"
 pytest-cov = "*"
 ruff = "^0.3.7"
@@ -45,8 +44,8 @@ warn_no_return = true
 warn_redundant_casts = true
 warn_unreachable = true
 warn_unused_configs = true
-warn_unused_ignores = true
-exclude = "^build/|^docs/"
+warn_unused_ignores = false
+exclude = "^tests/|^build/|^docs/"
 
 [tool.black]
 line-length = 120
@@ -131,7 +130,7 @@ format = ["isort_format", "black_format", "ruff_format", "_poetry_sort"]
 
 # type check
 mypy = "mypy milo"
-type-check = ["mypy"]
+type_check = ["mypy"]
 
 # delete venv and lock
 _delete_venv = "poetry env remove python"
