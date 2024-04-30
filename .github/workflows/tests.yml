@@ -48,7 +48,7 @@ jobs:
           path: ~/.local
           key: poetry-local-${{ runner.os }}-${{
             env.PYTHON_VERSION }}-${{
-            hashFiles('**/poetry.lock') }}-${{
+            hashFiles('poetry.lock') }}-${{
             hashFiles('.github/workflows/*.yml') }}
 
       - name: Install dependencies
