@@ -38,11 +38,46 @@ jobs:
       - uses: chartboost/ruff-action@v1
 
   type_check:
-    name: MyPy
     runs-on: ubuntu-latest
+    container: candidj0/milo:base
 
     steps:
-      - uses: actions/checkout@v4
-      - uses: jpetrucciani/mypy-check@master
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Get Python version
+        id: python_version
+        run: |
+          python_version="$(python --version 2>&1 | awk '{print $2}')"
+          echo PYTHON_VERSION="$python_version" >> "$GITHUB_ENV"
+
+      - name: Get Poetry version
+        id: poetry_version
+        run: |
+          poetry_version="$(poetry --version | cut -d' ' -f3 | sed 's/[()]//g')"
+          echo POETRY_VERSION="$poetry_version" >> "$GITHUB_ENV"
+
+      - name: Cache Poetry cache
+        if: ${{ !env.ACT }}
+        uses: actions/cache@v3
         with:
-          path: 'milo'
+          path: ~/.cache/pypoetry
+          key: poetry-cache-${{ runner.os }}-${{
+            env.PYTHON_VERSION }}-${{
+            env.POETRY_VERSION }}
+
+      - name: Cache Packages
+        if: ${{ !env.ACT }}
+        uses: actions/cache@v3
+        with:
+          path: ~/.local
+          key: poetry-local-${{ runner.os }}-${{
+            env.PYTHON_VERSION }}-${{
+            hashFiles('**/poetry.lock') }}-${{
+            hashFiles('.github/workflows/*.yml') }}
+
+      - name: Install dependencies
+        run: poetry install --no-interaction --no-root
+
+      - name: Run type-check
+        run: poetry run poe type-check
