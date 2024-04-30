@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 
 
 class Batch:
@@ -37,13 +38,16 @@ class Batch:
         return batch_dict
 
     def to_torch(self, device: str = "cpu", exclude_keys: list | None = None) -> None:
-        import torch
-
         exclude_keys = exclude_keys or ["info"]
 
         for key in self.__dict__:
             if isinstance(self.__dict__[key], np.ndarray) and key not in exclude_keys:
                 self.__dict__[key] = torch.from_numpy(self.__dict__[key]).to(device)
+
+    def to_numpy(self) -> None:
+        for key in self.__dict__:
+            if isinstance(self.__dict__[key], torch.Tensor):
+                self.__dict__[key] = self.__dict__[key].cpu().numpy()
 
     def __len__(self) -> int:
         return len(self._batch)
