@@ -14,7 +14,7 @@ concurrency:
 jobs:
   test:
     runs-on: ubuntu-latest
-    container: candidj0/milo:base
+    container: dmml/milo:base
 
     steps:
       - name: Checkout repo
