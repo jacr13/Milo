@@ -5,8 +5,8 @@ WORKDIR /
 
 RUN apt-get update -q \
     && DEBIAN_FRONTEND=noninteractive apt-get install --no-install-recommends -y \
-    libglu1-mesa-dev libgl1-mesa-dev libosmesa6-dev \
     xvfb unzip patchelf ffmpeg cmake swig git curl wget vim\
+    libglu1-mesa-dev libgl1-mesa-dev libosmesa6-dev \
     && apt-get autoremove -y \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*

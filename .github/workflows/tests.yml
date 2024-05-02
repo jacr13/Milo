@@ -14,9 +14,14 @@ concurrency:
 jobs:
   test:
     runs-on: self-hosted
-    container: dmml/milo:base
+    # runs-on: ubuntu-latest
+    # container: dmml/milo:base
 
     steps:
+      # needed for self-hosted runner since docker in docker not supported
+      - name: Install dependencies
+        run: sudo apt-get install -y libglu1-mesa-dev libgl1-mesa-dev libosmesa6-dev
+
       - name: Checkout repo
         uses: actions/checkout@v4
 
