@@ -13,10 +13,22 @@ concurrency:
 
 jobs:
   test:
-    runs-on: ubuntu-latest
-    container: candidj0/milo:base
+    runs-on: self-hosted
+    # runs-on: ubuntu-latest
+    # container: dmml/milo:base
 
     steps:
+      # needed for self-hosted runner since docker in docker not supported
+      - name: Install dependencies
+        run: sudo apt-get install -y libglu1-mesa-dev libgl1-mesa-dev libosmesa6-dev
+      - name: Set up Python environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Set up Poetry
+        run: pip install poetry poetry-dotenv-plugin
+
+      # common for gh runner and self-hosted one
       - name: Checkout repo
         uses: actions/checkout@v4
 
@@ -48,7 +60,7 @@ jobs:
           path: ~/.local
           key: poetry-local-${{ runner.os }}-${{
             env.PYTHON_VERSION }}-${{
-            hashFiles('**/poetry.lock') }}-${{
+            hashFiles('poetry.lock') }}-${{
             hashFiles('.github/workflows/*.yml') }}
 
       - name: Install dependencies
