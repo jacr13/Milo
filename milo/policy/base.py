@@ -34,3 +34,9 @@ class BasePolicy(nn.Module):
     @staticmethod
     def compute_episodic_return():
         return
+
+    def save(self, path: str):
+        pass
+
+    def load(self, path: str | None = None, state_dict: dict | None = None):
+        pass
