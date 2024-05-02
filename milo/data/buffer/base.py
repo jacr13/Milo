@@ -1,14 +1,22 @@
-import random
+import numpy as np
 
 from milo.data.batch import Batch
 from milo.data.transition import Transition
 
 
 class ReplayBuffer:
-    def __init__(self, capacity: int) -> None:
+    _seed: int | None = None
+    _random: np.random.Generator = np.random.default_rng()
+
+    def __init__(self, capacity: int, seed: int | None = None) -> None:
+        self._seed = seed
         self.capacity = capacity
         self.buffer: list = []
         self.reset()
+
+    def seed(self, seed: int | None) -> None:
+        self._seed = seed
+        self._random = np.random.default_rng(seed)
 
     def reset(self) -> None:
         self.buffer = []
@@ -19,7 +27,7 @@ class ReplayBuffer:
         self.buffer.append(transition)
 
     def sample(self, batch_size: int) -> Batch:
-        batch = random.sample(self.buffer, batch_size)
+        batch = self._random.choice(self.buffer, batch_size, replace=False).tolist()
         return Batch(batch)
 
     def batchify(self) -> Batch:

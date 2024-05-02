@@ -31,7 +31,11 @@ def make(
     # Randomly sample tasks, assumes num_env <= len(train_tasks)
     assert num_envs <= len(ml1.train_tasks), "num_envs must be <= len(train_tasks)"
 
-    tasks = random.sample(ml1.train_tasks, num_envs)
+    # Set the task for each environment
+    seed = env_spec_kwargs.get("seed", None)
+    rng = random.Random(seed)
+
+    tasks = rng.sample(ml1.train_tasks, num_envs)
     envs.call_ids("set_task", [{"args": [task]} for task in tasks])
 
     return envs
