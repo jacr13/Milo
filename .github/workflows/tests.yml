@@ -21,7 +21,14 @@ jobs:
       # needed for self-hosted runner since docker in docker not supported
       - name: Install dependencies
         run: sudo apt-get install -y libglu1-mesa-dev libgl1-mesa-dev libosmesa6-dev
+      - name: Set up Python environment
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.10"
+      - name: Set up Poetry
+        run: pip install poetry poetry-dotenv-plugin
 
+      # common for gh runner and self-hosted one
       - name: Checkout repo
         uses: actions/checkout@v4
 
