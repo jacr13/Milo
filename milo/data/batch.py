@@ -3,12 +3,13 @@ import numpy as np
 try:
     import torch
 except ImportError:
-    torch = None
+    torch = None  # type: ignore
 
 try:
     import jax
 except ImportError:
-    jax = None
+    jax = None  # type: ignore
+
 
 class Batch:
     obs: np.ndarray | None = None
