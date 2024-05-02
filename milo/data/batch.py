@@ -5,6 +5,10 @@ try:
 except ImportError:
     torch = None
 
+try:
+    import jax
+except ImportError:
+    jax = None
 
 class Batch:
     obs: np.ndarray | None = None
@@ -52,8 +56,29 @@ class Batch:
         assert torch is not None, "PyTorch is not installed"
 
         for key in self.__dict__:
-            if isinstance(self.__dict__[key], np.ndarray) and key not in exclude_keys:
+            # Skip the keys in exclude_keys
+            if key in exclude_keys:
+                continue
+
+            if isinstance(self.__dict__[key], np.ndarray):
                 self.__dict__[key] = torch.from_numpy(self.__dict__[key]).to(device)
+            else:
+                raise ValueError(f"Unknown type: {type(self.__dict__[key])}")
+
+    def to_jax(self, device: str | None = None, exclude_keys: list | None = None) -> None:
+        exclude_keys = exclude_keys or ["info"]
+
+        assert jax is not None, "JAX is not installed"
+
+        for key in self.__dict__:
+            # Skip the keys in exclude_keys
+            if key in exclude_keys:
+                continue
+
+            if isinstance(self.__dict__[key], np.ndarray):
+                self.__dict__[key] = jax.device_put(self.__dict__[key], device=device)
+            else:
+                raise ValueError(f"Unknown type: {type(self.__dict__[key])}")
 
     def __len__(self) -> int:
         return len(self._batch)
