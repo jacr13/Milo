@@ -26,8 +26,13 @@ class Transition:
 
     def __repr__(self) -> str:
         return (
-            f"Transition(obs={self.obs}, action={self.action}, "
-            f"reward={self.reward}, next_obs={self.next_obs}, "
-            f"done={self.done}, terminated={self.terminated}, "
-            f"truncated={self.truncated})"
+            f"Transition(\n"
+            f"  obs={self.obs},\n"
+            f"  action={self.action},\n"
+            f"  reward={self.reward},\n"
+            f"  next_obs={self.next_obs},\n"
+            f"  done={self.done},\n"
+            f"  terminated={self.terminated},\n"
+            f"  truncated={self.truncated},\n"
+            ")"
         )
