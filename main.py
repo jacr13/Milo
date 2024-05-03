@@ -8,7 +8,7 @@ envs_list = ["Humanoid-v5", "button-press-topdown-v2", "walker-walk"]
 for env_name in envs_list:
     env = make_env(env_name, num_envs=3, vectorization_mode="async", env_spec_kwargs={"render_mode": "rgb_array"})
 
-    buffer = ReplayBuffer(1000000)
+    buffer = ReplayBuffer()
     collector = Collector(None, env, buffer=buffer)
 
     collector.reset()

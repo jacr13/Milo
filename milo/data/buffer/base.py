@@ -26,8 +26,10 @@ class ReplayBuffer:
             self.buffer.pop(0)  # Remove the first element if the buffer is full
         self.buffer.append(transition)
 
-    def sample(self, batch_size: int, exclude: list | None = None, only: list | None = None) -> Batch:
-        batch = self._random.choice(self.buffer, batch_size, replace=False).tolist()
+    def sample(
+        self, batch_size: int, replace: bool = False, exclude: list | None = None, only: list | None = None,
+    ) -> Batch:
+        batch = self._random.choice(self.buffer, batch_size, replace=replace).tolist()
         return Batch(batch, exclude=exclude, only=only)
 
     def to_batch(self, exclude: list | None = None, only: list | None = None) -> Batch:

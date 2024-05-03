@@ -55,7 +55,7 @@ class Collector:
 
     def _setup_buffer(self, buffer: ReplayBuffer | None) -> ReplayBuffer:
         if buffer is None:
-            return ReplayBuffer(1000000)
+            return ReplayBuffer()
         else:
             return buffer
 
