@@ -8,7 +8,7 @@ class ReplayBuffer:
     _seed: int | None = None
     _random: np.random.Generator = np.random.default_rng()
 
-    def __init__(self, capacity: int, seed: int | None = None) -> None:
+    def __init__(self, capacity: int | None = None, seed: int | None = None) -> None:
         self._seed = seed
         self.capacity = capacity
         self.buffer: list = []
@@ -22,16 +22,16 @@ class ReplayBuffer:
         self.buffer = []
 
     def push(self, transition: Transition) -> None:
-        if len(self.buffer) >= self.capacity:
-            self.buffer.pop(0)  # Remove the first element
+        if self.capacity is not None and len(self.buffer) >= self.capacity:
+            self.buffer.pop(0)  # Remove the first element if the buffer is full
         self.buffer.append(transition)
 
-    def sample(self, batch_size: int) -> Batch:
+    def sample(self, batch_size: int, exclude: list | None = None, only: list | None = None) -> Batch:
         batch = self._random.choice(self.buffer, batch_size, replace=False).tolist()
-        return Batch(batch)
+        return Batch(batch, exclude=exclude, only=only)
 
-    def batchify(self) -> Batch:
-        return Batch(self.buffer)
+    def to_batch(self, exclude: list | None = None, only: list | None = None) -> Batch:
+        return Batch(self.buffer, exclude=exclude, only=only)
 
     def __len__(self) -> int:
         return len(self.buffer)

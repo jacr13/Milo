@@ -17,21 +17,42 @@ class Batch:
     info: np.ndarray | None = None
     pixels: np.ndarray | None = None
 
-    def __init__(self, batch: list) -> None:
+    def __init__(self, batch: list, exclude: list | None = None, only: list | None = None) -> None:
+        assert exclude is None or only is None, "Cannot specify both exclude and only keys."
+        exclude = exclude or []
+        only = only or []
+
+        self._keys = self._setup_keys(exclude, only)
         self._batch = batch
+        self._setup(set_attr=True)
 
-        self.batchify(set_attr=True)
+    def _setup_keys(self, exclude: list, only: list) -> list:
+        if only:
+            return only
 
-    def batchify(self, set_attr: bool = False) -> dict:
+        # Get the keys of the Batch object
+        keys = list(self.__annotations__.keys())
+        if exclude:
+            return list(set(keys) - set(exclude))
+        return keys
+
+    def get_keys(self) -> list:
+        return self._keys
+
+    def set_key(self, key: str, value: np.ndarray | None = None) -> None:
+        setattr(self, key, value)
+
+    def _setup(self, set_attr: bool = False) -> dict:
         keys = list(self._batch[0].__dict__.keys())
 
         # Check if all transitions have the same attributes
         for transition in self._batch[1:]:
-            assert set(transition.__dict__.keys()) == set(
-                keys,
-            ), "All transitions in the batch must have the same attributes."
+            assert set(self._keys).issubset(
+                set(transition.__dict__.keys()),
+            ), f"Transitions should have at least the following keys: {self._keys}"
 
         # Stack the attributes of the transitions in numpy arrays
+        # TODO: this should depend on the type of the transitions received, eg. numpy arrays or torch tensors
         batch_dict = {key: np.stack([getattr(transition, key) for transition in self._batch]) for key in keys}
 
         # Set the attributes of the Batch object to the numpy arrays (optional)
@@ -41,41 +62,53 @@ class Batch:
 
         return batch_dict
 
-    def to_numpy(self) -> None:
-        for key in self.__dict__:
+    def to_numpy(self, exclude: list | None = None, only: list | None = None) -> None:
+        assert only is None or exclude is None, "Cannot specify both exclude and only keys."
+        exclude = exclude or []
+        keys = only or list(self.__dict__.keys())
+
+        for key in keys:
+            if isinstance(self.__dict__[key], np.ndarray) or key in exclude:
+                continue
+
             if torch and isinstance(self.__dict__[key], torch.Tensor):
                 self.__dict__[key] = self.__dict__[key].cpu().numpy()
+            else:
+                self.__dict__[key] = np.array(self.__dict__[key])
 
-    def to_torch(self, device: str = "cpu", exclude_keys: list | None = None) -> None:
-        exclude_keys = exclude_keys or ["info"]
+    def to_torch(self, device: str = "cpu", exclude: list | None = None, only: list | None = None) -> None:
+        assert only is None or exclude is None, "Cannot specify both exclude and only keys."
+        exclude = exclude or ["info"]
+        keys = only or list(self.__dict__.keys())
 
         assert torch is not None, "PyTorch is not installed"
 
-        for key in self.__dict__:
-            # Skip the keys in exclude_keys
-            if key in exclude_keys:
+        for key in keys:
+            # Skip the keys in exclude
+            if key in exclude or key.startswith("_"):
+                continue
+
+            if isinstance(self.__dict__[key], torch.Tensor):
                 continue
 
             if isinstance(self.__dict__[key], np.ndarray):
+                # Check if the dtype is not an object (impossible to convert to torch)
+                # Needed to avoid converting arrays of Nones for exemple
+                if self.__dict__[key].dtype == np.object_:
+                    continue
+
                 self.__dict__[key] = torch.from_numpy(self.__dict__[key]).to(device)
             else:
-                raise ValueError(f"Unknown type: {type(self.__dict__[key])}")
+                try:
+                    self.__dict__[key] = torch.tensor(self.__dict__[key], device=device)
+                except TypeError as exc:
+                    raise ValueError(f"Unknown type: {type(self.__dict__[key])}") from exc
 
     def __len__(self) -> int:
         return len(self._batch)
 
     def __repr__(self) -> str:
-
-        return (
-            "Batch(\n"
-            f"\tobs = {self.obs if self.obs is None else self.obs.shape},\n"
-            f"\taction = {self.action if self.action is None else self.action.shape},\n"
-            f"\treward = {self.reward if self.reward is None else self.reward.shape},\n"
-            f"\tnext_obs = {self.next_obs if self.next_obs is None else self.next_obs.shape},\n"
-            f"\tdone = {self.done if self.done is None else self.done.shape},\n"
-            f"\tterminated = {self.terminated if self.terminated is None else self.terminated.shape},\n"
-            f"\ttruncated = {self.truncated if self.truncated is None else self.truncated.shape},\n"
-            f"\tinfo = {self.info if self.info is None else self.info.shape},\n"
-            f"\tpixels = {self.pixels if self.pixels is None else self.pixels.shape},\n"
-            ")"
+        attributes = ",\n".join(
+            [f"  {key} = {self.__dict__[key].shape if self.__dict__[key] is not None else None}" for key in self._keys],
         )
+        return f"Batch(\n{attributes}\n)"
