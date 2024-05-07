@@ -127,6 +127,7 @@ lint = ["black_check", "ruff_check"]
 isort_format = "poetry run isort ."
 black_format = "poetry run black ."
 ruff_format = "poetry run ruff check --fix ."
+ruff_fix = "poetry run ruff check --fix --unsafe-fixes ."
 format = ["isort_format", "black_format", "ruff_format", "_poetry_sort"]
 
 # type check
