@@ -27,8 +27,18 @@ class ReplayBuffer:
         self.buffer.append(transition)
 
     def sample(
-        self, batch_size: int, replace: bool = False, exclude: list | None = None, only: list | None = None,
+        self,
+        batch_size: int | None,
+        replace: bool = False,
+        exclude: list | None = None,
+        only: list | None = None,
     ) -> Batch:
+        batch_size = batch_size or len(self.buffer)
+
+        # TODO: check if we need to return indices
+        # indices = self._random.choice(len(self.buffer), batch_size, replace=replace)
+        # batch = np.array(self.buffer)[indices].tolist()
+        # otherwise return the batch simply from choice
         batch = self._random.choice(self.buffer, batch_size, replace=replace).tolist()
         return Batch(batch, exclude=exclude, only=only)
 
@@ -39,4 +49,4 @@ class ReplayBuffer:
         return len(self.buffer)
 
     def __repr__(self) -> str:
-        return f"ReplayBuffer(capacity={self.capacity}, buffer length={self.__len__()})"
+        return f"ReplayBuffer(capacity={self.capacity}, buffer_length={self.__len__()})"
