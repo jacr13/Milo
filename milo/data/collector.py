@@ -114,6 +114,7 @@ class Collector:
         render: bool = False,
         no_grad: bool = True,
         reset_before_collect: bool = False,
+        force_one_episode_per_env: bool = False,
         gym_reset_kwargs: dict[str, Any] | None = None,
     ) -> None:
         if (n_step is not None and n_episode is not None) or (n_step is None and n_episode is None):
@@ -125,10 +126,11 @@ class Collector:
         if n_episode is not None:
             assert n_episode > 0, f"n_episode must be positive, but got {n_episode=}."
 
-        if n_episode is not None and n_episode < self.env_num:
+        if n_episode is not None and n_episode < self.env_num and force_one_episode_per_env:
             warnings.warn(
                 "You are trying to collect fewer episodes than the number of environments. "
-                f"Got {n_episode=}, while the number of environments is {self.env_num}.",
+                f"Got {n_episode=}, while the number of environments is {self.env_num}."
+                " The number of episodes will be adjusted accordingly to match the number of environments.",
             )
 
         start_time = time.time()
@@ -144,6 +146,7 @@ class Collector:
 
         step_count: int = 0
         num_collected_episodes: int = 0
+        num_collected_episodes_per_env: np.ndarray = np.zeros(self.env_num)
 
         while True:
             actions = self._get_actions()
@@ -159,12 +162,16 @@ class Collector:
             obs = next_obs
 
             step_count += 1
-            num_collected_episodes += sum(done)
+            num_collected_episodes += np.sum(done)
+            num_collected_episodes_per_env += done
 
             if n_step is not None and step_count >= n_step:
                 break
             if n_episode is not None and num_collected_episodes >= n_episode:
-                break
+                if not force_one_episode_per_env:
+                    break
+                if force_one_episode_per_env and np.all(num_collected_episodes_per_env >= 0):
+                    break
 
         # generate statistics
         self.collect_step += step_count
