@@ -22,7 +22,6 @@ class Batch:
         self,
         data: list | dict,
         batch_type: Literal["torch", "numpy"] | None = None,
-        device: torch.device | None = None,
         exclude: list | None = None,
         only: list | None = None,
     ) -> None:
@@ -30,10 +29,10 @@ class Batch:
         exclude = exclude or []
         only = only or []
 
-        self._device = device or torch.device("cpu")
         self._keys = self._setup_keys(exclude, only)
         self._data = data
         self._batch_type = batch_type or self._get_batch_type(data)
+
         self._setup(set_attr=True)
 
     def _get_batch_type(self, data: list | dict) -> Literal["torch", "numpy"]:
@@ -119,7 +118,10 @@ class Batch:
         self._batch_type = "numpy"
 
     def to_torch(
-        self, device: torch.device | None = None, exclude: list | None = None, only: list | None = None,
+        self,
+        device: torch.device | str | None = None,
+        exclude: list | None = None,
+        only: list | None = None,
     ) -> None:
         assert only is None or exclude is None, "Cannot specify both exclude and only keys."
         exclude = exclude or ["info"]
@@ -137,7 +139,7 @@ class Batch:
 
             if isinstance(self.__dict__[key], np.ndarray):
                 # Check if the dtype is not an object (impossible to convert to torch)
-                # Needed to avoid converting arrays of Nones for exemple
+                # Needed to avoid converting arrays of Nones for example
                 if self.__dict__[key].dtype == np.object_:
                     continue
 
@@ -150,7 +152,7 @@ class Batch:
 
         self._batch_type = "torch"
 
-    def to(self, device: torch.device) -> None:
+    def to(self, device: torch.device | str) -> None:
         if self._batch_type == "numpy":
             warnings.warn("Batch is in numpy format, it will be converted to torch format automatically.")
 
@@ -168,6 +170,7 @@ class Batch:
 
 class BatchObs(Batch):
     """Batch of observations."""
+
     def __init__(self, obs: np.ndarray | torch.Tensor, **kwargs: Any) -> None:
         super().__init__({"obs": obs}, only=["obs"], **kwargs)
 
@@ -181,6 +184,7 @@ class BatchObs(Batch):
 
 class BatchAction(Batch):
     """Batch of actions."""
+
     def __init__(self, action: np.ndarray | torch.Tensor, **kwargs: Any) -> None:
         super().__init__({"action": action}, only=["action"], **kwargs)
 
