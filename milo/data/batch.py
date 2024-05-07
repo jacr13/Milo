@@ -88,9 +88,6 @@ class Batch:
         else:
             raise ValueError(f"Unsupported data type: {type(self._data)}")
 
-        for key, value in batch_dict.items():
-            print(key, type(value))
-
         if self._batch_type == "numpy":
             batch_dict = {key: np.stack(value) for key, value in batch_dict.items()}
         elif self._batch_type == "torch":
