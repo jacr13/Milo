@@ -9,7 +9,7 @@ import torch
 import torch.nn as nn
 from gymnasium.spaces import Box, Discrete, MultiBinary, MultiDiscrete
 
-from milo.data.batch import Batch
+from milo.data.batch import Batch, BatchAction, BatchObs
 from milo.data.buffer.base import ReplayBuffer
 from milo.utils.timer import Timer
 
@@ -52,7 +52,7 @@ class BasePolicy(ABC, nn.Module):
         pass
 
     @abstractmethod
-    def forward(self, batch: Batch, **kwargs: Any) -> Batch:
+    def forward(self, batch: BatchObs, **kwargs: Any) -> BatchAction:
         """Forward logic for policy (should be implemented by subclasses)."""
 
     @abstractmethod

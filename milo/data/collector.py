@@ -10,12 +10,13 @@ from gymnasium.vector import SyncVectorEnv, VectorEnv
 
 from milo.data.buffer.base import ReplayBuffer
 from milo.data.transition import Transition
+from milo.policy.base import BasePolicy
 
 
 class Collector:
     def __init__(
         self,
-        policy: None,
+        policy: BasePolicy,
         env: gym.Env | VectorEnv,
         buffer: ReplayBuffer | None = None,
         exploration_noise: bool = False,
@@ -102,9 +103,13 @@ class Collector:
         if self.buffer is not None:
             self.buffer.push(transition)
 
-    def _get_actions(self) -> np.ndarray:
+    def _get_actions(self, random: bool, no_grad: bool) -> np.ndarray:
         # TODO: implement with policy
+        if random:
+            return self.env.action_space.sample()
+        
         return self.env.action_space.sample()
+
 
     def collect(
         self,
@@ -116,7 +121,7 @@ class Collector:
         reset_before_collect: bool = False,
         force_one_episode_per_env: bool = False,
         gym_reset_kwargs: dict[str, Any] | None = None,
-    ) -> None:
+    ) -> dict:
         if (n_step is not None and n_episode is not None) or (n_step is None and n_episode is None):
             raise ValueError(
                 f"Either n_step or n_episode must be specified (but not both or none), but got {n_step=}, {n_episode=}.",
@@ -149,7 +154,7 @@ class Collector:
         num_collected_episodes_per_env: np.ndarray = np.zeros(self.env_num)
 
         while True:
-            actions = self._get_actions()
+            actions = self._get_actions(random=random, no_grad=no_grad)
             next_obs, rewards, terminated, truncated, info = self.env.step(actions)  # type: ignore
             done = terminated | truncated
 
@@ -178,3 +183,12 @@ class Collector:
         self.collect_episode += num_collected_episodes
         collect_time = max(time.time() - start_time, 1e-9)
         self.collect_time += collect_time
+
+        # TODO: collect return fix with true computed return
+        ret = [t.reward for t in self.buffer.buffer]
+        return {
+            "collect_step": self.collect_step,
+            "collect_episode": self.collect_episode,
+            "collect_time": self.collect_time,
+            "return": np.sum(ret),
+        }

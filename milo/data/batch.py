@@ -160,6 +160,10 @@ class Batch:
 
         self.to_torch(device=device)
 
+    def get_batch_obs(self) -> "BatchObs":
+        assert self.obs is not None, "Batch does not contain observation."
+        return BatchObs(obs=self.obs)
+
     def __len__(self) -> int:
         return len(self._data)
 
