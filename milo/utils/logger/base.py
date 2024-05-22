@@ -6,8 +6,9 @@ class BaseLogger(ABC):
     def log(self, **kwargs) -> None:
         """Log data."""
 
+    @abstractmethod
     def download(self) -> None:
-        pass
+        """Download data from remote logger."""
 
     @abstractmethod
     def close(self) -> None:

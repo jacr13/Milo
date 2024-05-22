@@ -56,7 +56,7 @@ class BasePolicy(ABC, nn.Module):
         """Forward logic for policy (should be implemented by subclasses)."""
 
     @abstractmethod
-    def learn(self, batch: Batch, *args: Any, **kwargs: Any) -> None:
+    def learn(self, batch: Batch, *args: Any, **kwargs: Any) -> dict:
         """Learn logic for policy (should be implemented by subclasses)."""
 
     def process_fn(self, batch: Batch, buffer: ReplayBuffer) -> Batch:
@@ -76,7 +76,7 @@ class BasePolicy(ABC, nn.Module):
             timer.stop()
             self.updating = False
 
-    def update(self, sample_size: int | None, buffer: ReplayBuffer | None, **kwargs: Any) -> None:
+    def update(self, sample_size: int | None, buffer: ReplayBuffer | None, **kwargs: Any) -> dict:
         if buffer is None:
             raise ValueError("Buffer is None, can not update policy.")
 
@@ -88,7 +88,7 @@ class BasePolicy(ABC, nn.Module):
             batch = self.process_fn(batch, buffer)
 
             # Learn
-            self.learn(batch, **kwargs)
+            training_stats = self.learn(batch, **kwargs)
 
             # Post-process batch data after learning
             self.post_process_fn(batch, buffer)
@@ -98,6 +98,8 @@ class BasePolicy(ABC, nn.Module):
                 self.lr_scheduler.step()
 
         print(f"Update time: {timer.final_time()}")
+
+        return training_stats
 
     def save(self, path: str, filename: str = "policy.pt") -> None:
         os.makedirs(path, exist_ok=True)

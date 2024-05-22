@@ -4,5 +4,5 @@ class PPOPolicy:
         self.optimizer = None
         self.action_space = None
 
-    def learn(self):
-        pass
+    def learn(self) -> dict:
+        return {}

@@ -1,11 +1,11 @@
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 
 from milo.data.buffer.base import ReplayBuffer
 from milo.data.collector import Collector
 from milo.policy.base import BasePolicy
 
 
-class Trainer:
+class Trainer(ABC):
     def __init__(
         self,
         policy: BasePolicy,
@@ -107,17 +107,22 @@ class Trainer:
                         self.save()
 
                 if self.logger is not None:
-                    self.logger.log(train=training_stats, test=test_stats, collection=collect_stats, step=self._interactions_count)
+                    self.logger.log(
+                        train=training_stats,
+                        test=test_stats,
+                        collection=collect_stats,
+                        step=self._interactions_count,
+                    )
 
         finally:
             self.close()
         return stats
 
     def save(self) -> None:
-        pass
+        return
 
     def load(self) -> None:
-        pass
+        return
 
     def close(self) -> None:
-        pass
+        return

@@ -1,7 +1,7 @@
 from milo.data.collector import Collector
 from milo.env import make_env
 from milo.policy.random import RandomPolicy
-from milo.trainer.base import Trainer
+from milo.trainer import OnpolicyTrainer
 from milo.utils.logger.wandb import WandbLogger
 
 envs_list = ["Humanoid-v5", "button-press-topdown-v2", "walker-walk"]
@@ -27,7 +27,7 @@ policy = RandomPolicy(train_env.action_space)
 train_collector = Collector(policy, train_env)
 test_collector = Collector(policy, test_env)
 
-trainer = Trainer(
+trainer = OnpolicyTrainer(
     policy,
     train_collector,
     test_collector,
