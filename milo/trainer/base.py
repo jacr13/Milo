@@ -21,7 +21,7 @@ class Trainer:
         episode_per_collect: int | None = None,
         episode_per_test: int | None = None,
         eval_frequency: int = 10,
-        save_frequency: int|None = None,
+        save_frequency: int | None = None,
         save_best: bool = True,
         logger=None,
     ):
@@ -47,10 +47,11 @@ class Trainer:
 
         self.logger = logger
 
+        self._interactions_count = 0
+
     @abstractmethod
     def policy_update_fn(self) -> dict:
         """Policy update logic (should be implemented by subclasses)."""
-        pass
 
     def training_step(self) -> tuple[dict, dict]:
 
@@ -60,6 +61,7 @@ class Trainer:
                 n_step=self.step_per_collect,
                 n_episode=self.episode_per_collect,
             )
+            self._interactions_count += collect_stats["collect_step"]
         else:
             assert self.buffer is not None, "Either train_collector or buffer must be provided."
             collect_stats = {}
@@ -80,13 +82,14 @@ class Trainer:
         best_eval_return = -float("inf")
         current_eval_return = -float("inf")
         training_stats = None
-        test_stats = None
+        test_stats = {}
         collect_stats = None
         stats = {}
 
         # TODO: Add pretraining
         try:
             for epoch in range(self.max_epoch):
+                print(f"Epoch: {epoch}/{self.max_epoch}, Step: {self._interactions_count}")
 
                 if self.save_frequency is not None and epoch % self.save_frequency == 0:
                     self.save()
@@ -104,7 +107,7 @@ class Trainer:
                         self.save()
 
                 if self.logger is not None:
-                    self.logger.log(epoch, training_stats, test_stats, collect_stats)
+                    self.logger.log(train=training_stats, test=test_stats, collection=collect_stats, step=self._interactions_count)
 
         finally:
             self.close()

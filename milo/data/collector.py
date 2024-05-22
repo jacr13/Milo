@@ -107,9 +107,8 @@ class Collector:
         # TODO: implement with policy
         if random:
             return self.env.action_space.sample()
-        
-        return self.env.action_space.sample()
 
+        return self.env.action_space.sample()
 
     def collect(
         self,

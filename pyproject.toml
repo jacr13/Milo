@@ -18,6 +18,7 @@ dm-control = "1.0.14" # last version before mujoco v3, mandatory for metaworld..
 metaworld = {git = "https://github.com/jacr13/Metaworld.git", rev = "fix-box-warning"} # until metaworld merges
 numpy = "^1"
 torch = "^2.3.0"
+wandb = "^0.17.0"
 
 [tool.poetry.group.dev.dependencies]
 black = { version = "^24.4.0", extras = ["jupyter"] }
@@ -152,6 +153,7 @@ rm -rf .coverage
         .pytest_cache
         ./**/__pycache__
         dist
+        logs
 """
 
 debug = "poetry run python main.py"
