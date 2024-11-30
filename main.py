@@ -31,6 +31,9 @@ print(batch)
 import numpy as np
 import torch
 
+gamma: float = 0.99
+lam: float = 0.95
+
 rewards = batch.reward  # Shape: (T, N)
 values = batch.returns if batch.returns is not None else np.zeros_like(rewards)
 dones = batch.done  # Shape: (T, N)
