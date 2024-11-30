@@ -23,6 +23,8 @@ class Transition:
         self.done = done
         self.terminated = terminated
         self.truncated = truncated
+        self.returns = returns
+        self.advantages = advantages
         self.info = info
         self.pixels = pixels
 
@@ -36,5 +38,7 @@ class Transition:
             f"  done={self.done},\n"
             f"  terminated={self.terminated},\n"
             f"  truncated={self.truncated},\n"
+            f"  returns={self.returns},\n"
+            f"  advantages={self.advantages},\n"
             ")"
         )
