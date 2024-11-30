@@ -41,7 +41,7 @@ class ReplayBuffer:
 
         buffer = self.buffer
         if flatten:
-            buffer = [transition.flatten() for transition in self.buffer]
+            buffer = [small_transition for transition in self.buffer for small_transition in transition.unpack()]
 
         idx_to_sample = list(range(len(buffer)))
         self._random.shuffle(idx_to_sample)

@@ -28,8 +28,28 @@ class Transition:
         self.info = info
         self.pixels = pixels
 
-    def flatten(self):
-        return []
+    def unpack(self):
+        """Unpack this Transition into a list of smaller Transitions based on the first dimension."""
+        num_transitions = self.obs.shape[0]
+        unpacked_transitions = []
+
+        for i in range(num_transitions):
+            new_transition = Transition(
+                obs=self.obs[i],
+                action=self.action[i],
+                reward=self.reward[i],
+                next_obs=self.next_obs[i],
+                done=self.done[i],
+                terminated=self.terminated[i] if self.terminated is not None else None,
+                truncated=self.truncated[i] if self.truncated is not None else None,
+                returns=self.returns[i] if self.returns is not None else None,
+                advantages=self.advantages[i] if self.advantages is not None else None,
+                info={key: value[i] for key, value in self.info.items()},
+                pixels=self.pixels[i] if self.pixels is not None else None,
+            )
+            unpacked_transitions.append(new_transition)
+
+        return unpacked_transitions
 
     def __repr__(self) -> str:
         return (
