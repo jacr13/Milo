@@ -1,3 +1,5 @@
+from typing import Iterator
+
 import numpy as np
 
 from milo.data.batch import Batch
@@ -20,11 +22,30 @@ class ReplayBuffer:
 
     def reset(self) -> None:
         self.buffer = []
+        self._idx_to_sample = None
+        self._idx_current = 0
 
     def push(self, transition: Transition) -> None:
         if self.capacity is not None and len(self.buffer) >= self.capacity:
             self.buffer.pop(0)  # Remove the first element if the buffer is full
         self.buffer.append(transition)
+
+    def batches(
+        self,
+        batch_size: int,
+        exclude: list | None = None,
+        only: list | None = None,
+    ) -> Iterator[Batch]:
+        batch_size = batch_size or len(self.buffer)
+
+        idx_to_sample = list(range(len(self.buffer)))
+        self._random.shuffle(idx_to_sample)
+
+        # Iterate over the shuffled indices in chunks of `batch_size`
+        for start in range(0, len(idx_to_sample), batch_size):
+            batch_indices = idx_to_sample[start : start + batch_size]
+            batch = [self.buffer[idx] for idx in batch_indices]
+            yield Batch(batch)
 
     def sample(
         self,

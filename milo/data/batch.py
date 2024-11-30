@@ -34,6 +34,14 @@ class Batch:
         self._batch_type = batch_type or self._get_batch_type(data)
 
         self._setup(set_attr=True)
+        self._device = self._get_device()
+
+    def _get_device(self) -> Literal["cpu", "cuda"]:
+        if self._batch_type == "torch":
+            for key in self._keys:
+                if isinstance(self.__dict__[key], torch.Tensor):
+                    print("here", self.__dict__[key].device)
+        return "cpu"
 
     def _get_batch_type(self, data: list | dict) -> Literal["torch", "numpy"]:
         data_example = None
@@ -70,6 +78,7 @@ class Batch:
 
     def _setup(self, set_attr: bool = False) -> dict:
         batch_dict = {}
+        device = None
         if isinstance(self._data, list) and isinstance(self._data[0], Transition):
             # Check if all transitions have the same attributes
             for transition in self._data[1:]:
@@ -77,7 +86,7 @@ class Batch:
                     set(transition.__dict__.keys()),
                 ), f"Transitions should have at least the following keys: {self._keys}, but got {set(transition.__dict__.keys())}"
 
-            # Stack the attributes of the transitions in numpy arrays
+            # Stack the attributes of the transitions
             batch_dict = {key: [getattr(transition, key) for transition in self._data] for key in self._keys}
         elif isinstance(self._data, dict):
             assert set(self._keys).issubset(
@@ -103,7 +112,7 @@ class Batch:
 
         return batch_dict
 
-    def to_numpy(self, exclude: list | None = None, only: list | None = None) -> None:
+    def to_numpy(self, exclude: list | None = None, only: list | None = None) -> "Batch":
         assert only is None or exclude is None, "Cannot specify both exclude and only keys."
         exclude = exclude or []
         keys = only or list(self.__dict__.keys())
@@ -118,18 +127,20 @@ class Batch:
                 self.__dict__[key] = np.array(self.__dict__[key])
 
         self._batch_type = "numpy"
+        self._device = "cpu"
+        return self
 
     def to_torch(
         self,
         device: torch.device | str | None = None,
         exclude: list | None = None,
         only: list | None = None,
-    ) -> None:
+    ) -> "Batch":
         assert only is None or exclude is None, "Cannot specify both exclude and only keys."
         exclude = exclude or ["info"]
         keys = only or list(self.__dict__.keys())
 
-        device = device or torch.device("cpu")
+        device = device or "cpu"
 
         for key in keys:
             # Skip the keys in exclude
@@ -148,29 +159,41 @@ class Batch:
                 self.__dict__[key] = torch.from_numpy(self.__dict__[key]).to(device)
             else:
                 try:
+                    print(self.__dict__[key])
                     self.__dict__[key] = torch.tensor(self.__dict__[key], device=device)
                 except TypeError as exc:
                     raise ValueError(f"Unknown type: {type(self.__dict__[key])}") from exc
 
         self._batch_type = "torch"
+        self._device = device
+        return self
 
-    def to(self, device: torch.device | str) -> None:
+    def to(self, device: torch.device | str) -> "Batch":
         if self._batch_type == "numpy":
             warnings.warn("Batch is in numpy format, it will be converted to torch format automatically.")
 
-        self.to_torch(device=device)
+        return self.to_torch(device=device)
 
     def get_batch_obs(self) -> "BatchObs":
         assert self.obs is not None, "Batch does not contain observation."
         return BatchObs(obs=self.obs)
 
+    def get_batch_actions(self) -> "BatchActions":
+        assert self.action is not None, "Batch does not contain actions."
+        return BatchActions(action=self.action)
+
     def __len__(self) -> int:
         return len(self._data)
+
+    def __getitem__(self, key: str) -> Any:
+        return self.__dict__[key]
 
     def __repr__(self) -> str:
         attributes = ",\n".join(
             [f"  {key} = {self.__dict__[key].shape if self.__dict__[key] is not None else None}" for key in self._keys],
         )
+        attributes += f"\n  dtype = {self._batch_type},\n"
+        attributes += f"  device = {self._device}"
         return f"Batch(\n{attributes}\n)"
 
 
@@ -185,10 +208,12 @@ class BatchObs(Batch):
         attributes = ",\n".join(
             [f"  {key} = {self.__dict__[key].shape if self.__dict__[key] is not None else None}" for key in self._keys],
         )
+        attributes += f"\n  dtype = {self._batch_type},\n"
+        attributes += f"  device = {self._device}"
         return f"BatchObs(\n{attributes}\n)"
 
 
-class BatchAction(Batch):
+class BatchActions(Batch):
     """Batch of actions."""
 
     def __init__(self, action: np.ndarray | torch.Tensor, **kwargs: Any) -> None:
@@ -199,4 +224,6 @@ class BatchAction(Batch):
         attributes = ",\n".join(
             [f"  {key} = {self.__dict__[key].shape if self.__dict__[key] is not None else None}" for key in self._keys],
         )
-        return f"BatchAction(\n{attributes}\n)"
+        attributes += f"\n  dtype = {self._batch_type},\n"
+        attributes += f"  device = {self._device}"
+        return f"BatchActions(\n{attributes}\n)"

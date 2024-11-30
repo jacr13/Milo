@@ -6,17 +6,18 @@ from typing import Any
 
 import gymnasium as gym
 import numpy as np
+import torch
 from gymnasium.vector import SyncVectorEnv, VectorEnv
 
+from milo.agents.base import BasePolicy
 from milo.data.buffer.base import ReplayBuffer
 from milo.data.transition import Transition
-from milo.policy.base import BasePolicy
 
 
 class Collector:
     def __init__(
         self,
-        policy: BasePolicy,
+        policy: BasePolicy | None,
         env: gym.Env | VectorEnv,
         buffer: ReplayBuffer | None = None,
         exploration_noise: bool = False,
@@ -103,12 +104,12 @@ class Collector:
         if self.buffer is not None:
             self.buffer.push(transition)
 
-    def _get_actions(self, random: bool, no_grad: bool) -> np.ndarray:
+    def _get_actions(self, random: bool, no_grad: bool) -> np.ndarray | torch.Tensor:
         # TODO: implement with policy
-        if random:
+        if random or self.policy is None:
             return self.env.action_space.sample()
-
-        return self.env.action_space.sample()
+        action = self.policy.select_action(self._pre_obs, deterministic=False)
+        return action
 
     def collect(
         self,

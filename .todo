@@ -1,0 +1,13 @@
+- take timer from otflex
+- take logger from otflex
+- add logger to atalaya
+- create a file per algorithm
+    - ppo
+    - sac
+    - gail
+    - gail-bc
+    - maad
+    - etc
+- add envs
+  - dflex
+  - my pytorch env
