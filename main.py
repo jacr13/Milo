@@ -35,10 +35,10 @@ gamma: float = 0.99
 lam: float = 0.95
 
 rewards = batch.reward  # Shape: (T, N)
-values = batch.returns if batch.returns is not None else np.zeros_like(rewards)
+values = np.zeros_like(rewards)
 dones = batch.done  # Shape: (T, N)
 
-print(values)
+print(values.shape)
 
 if isinstance(rewards, torch.Tensor):
     returns = torch.zeros_like(rewards)
