@@ -38,6 +38,8 @@ rewards = batch.reward  # Shape: (T, N)
 values = batch.returns if batch.returns is not None else np.zeros_like(rewards)
 dones = batch.done  # Shape: (T, N)
 
+print(values)
+
 if isinstance(rewards, torch.Tensor):
     returns = torch.zeros_like(rewards)
     advantages = torch.zeros_like(rewards)
@@ -48,6 +50,7 @@ else:  # NumPy
     last_gae = np.zeros(rewards.shape[1])
 
 print(rewards.shape, values.shape, dones.shape)
+print(returns.shape, advantages.shape, last_gae.shape)
 
 # Iterate backwards to compute returns and advantages
 for t in reversed(range(rewards.shape[0])):
