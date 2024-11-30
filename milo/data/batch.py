@@ -15,6 +15,8 @@ class Batch:
     done: np.ndarray | torch.Tensor | None = None
     terminated: np.ndarray | torch.Tensor | None = None
     truncated: np.ndarray | torch.Tensor | None = None
+    returns: np.ndarray | torch.Tensor | None = None
+    advantages: np.ndarray | torch.Tensor | None = None
     info: list | None = None
     pixels: np.ndarray | torch.Tensor | None = None
 

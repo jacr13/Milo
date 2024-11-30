@@ -24,11 +24,16 @@ train_collector = Collector(None, train_env)
 train_collector.reset()
 train_collector.collect(n_step=1000, reset_before_collect=True)
 
-batch = train_collector.buffer.sample(10)
+buffer = train_collector.buffer
+batch = buffer.to_batch()
 
-for i in range(10):
-    print("iter", i)
-    for batch in train_collector.buffer.batches(batch_size=500):
-        print(batch)
+print(batch)
 
-# input("Press Enter to continue...")
+# batch = train_collector.buffer.sample(10)
+
+# for i in range(10):
+#     print("iter", i)
+#     for batch in train_collector.buffer.batches(batch_size=500):
+#         print(batch)
+
+# # input("Press Enter to continue...")

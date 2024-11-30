@@ -1,4 +1,4 @@
-from typing import Iterator
+from collections.abc import Iterator
 
 import numpy as np
 
@@ -65,6 +65,10 @@ class ReplayBuffer:
 
     def to_batch(self, exclude: list | None = None, only: list | None = None) -> Batch:
         return Batch(self.buffer, exclude=exclude, only=only)
+
+    def compute_returns_and_advantages(self) -> (None, None):
+
+        return returns, advantages
 
     def __len__(self) -> int:
         return len(self.buffer)
