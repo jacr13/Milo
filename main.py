@@ -65,6 +65,10 @@ for t in reversed(range(rewards.shape[0])):
 batch.returns = returns
 batch.advantages = advantages
 
+print(returns)
+print(advantages)
+
+
 # batch = train_collector.buffer.sample(10)
 
 # for i in range(10):
