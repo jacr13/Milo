@@ -47,6 +47,8 @@ else:  # NumPy
     advantages = np.zeros_like(rewards)
     last_gae = np.zeros(rewards.shape[1])
 
+print(rewards.shape, values.shape, dones.shape)
+
 # Iterate backwards to compute returns and advantages
 for t in reversed(range(rewards.shape[0])):
     mask = 1.0 - dones[t]  # Handle episode ends
