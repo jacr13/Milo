@@ -68,11 +68,19 @@ batch.advantages = advantages
 print(returns)
 print(advantages)
 
-for i in range(len(buffer.buffer)):
-    transition = buffer.buffer[i]
-    mask = 1.0 - transition.done
-    print(mask)
+last_gae = np.zeros(buffer.buffer[0].reward.shape[1])
 
+values
+
+T = len(buffer.buffer)
+for t in reversed(range(T)):
+    transition = buffer.buffer[t]
+    mask = 1.0 - transition.done
+    next_value = values if t + 1 < T else 0
+    delta = transition.reward + gamma * next_value * mask - values
+    last_gae = delta + gamma * lam * mask * last_gae
+    advantages[t] = last_gae
+    returns[t] = advantages[t] + values[t]
 
 # batch = train_collector.buffer.sample(10)
 
