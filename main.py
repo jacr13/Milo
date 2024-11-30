@@ -28,6 +28,34 @@ buffer = train_collector.buffer
 batch = buffer.to_batch()
 
 print(batch)
+import numpy as np
+import torch
+
+rewards = batch.reward  # Shape: (T, N)
+values = batch.returns if batch.returns is not None else np.zeros_like(rewards)
+dones = batch.done  # Shape: (T, N)
+
+if isinstance(rewards, torch.Tensor):
+    returns = torch.zeros_like(rewards)
+    advantages = torch.zeros_like(rewards)
+    last_gae = torch.zeros(rewards.shape[1], device=rewards.device)
+else:  # NumPy
+    returns = np.zeros_like(rewards)
+    advantages = np.zeros_like(rewards)
+    last_gae = np.zeros(rewards.shape[1])
+
+# Iterate backwards to compute returns and advantages
+for t in reversed(range(rewards.shape[0])):
+    mask = 1.0 - dones[t]  # Handle episode ends
+    next_value = values[t + 1] if t + 1 < rewards.shape[0] else 0
+    delta = rewards[t] + gamma * next_value * mask - values[t]
+    last_gae = delta + gamma * lam * mask * last_gae
+    advantages[t] = last_gae
+    returns[t] = advantages[t] + values[t]
+
+# Store the computed values in the batch
+batch.returns = returns
+batch.advantages = advantages
 
 # batch = train_collector.buffer.sample(10)
 
