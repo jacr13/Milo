@@ -68,6 +68,8 @@ batch.advantages = advantages
 print(returns)
 print(advantages)
 
+print(buffer)
+
 last_gae = np.zeros(buffer.buffer[0].reward.shape[1])
 
 values
