@@ -1,6 +1,5 @@
 from milo.data.collector import Collector
 from milo.env import make_env
-from milo.utils.logger.wandb import WandbLogger
 
 envs_list = ["Humanoid-v5", "button-press-topdown-v2", "walker-walk"]
 
@@ -8,8 +7,8 @@ envs_list = ["Humanoid-v5", "button-press-topdown-v2", "walker-walk"]
 # for env_name in envs_list:
 
 env_name = "Humanoid-v5"
-train_env = make_env(env_name, num_envs=3, vectorization_mode="async", env_spec_kwargs={"render_mode": "rgb_array"})
-test_env = make_env(env_name, num_envs=2, vectorization_mode="async", env_spec_kwargs={"render_mode": "rgb_array"})
+train_env = make_env(env_name, num_envs=3, vectorization_mode="async", env_spec_kwargs={"render_mode": None})
+test_env = make_env(env_name, num_envs=2, vectorization_mode="async", env_spec_kwargs={"render_mode": None})
 
 
 # logger = WandbLogger(

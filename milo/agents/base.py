@@ -3,19 +3,19 @@ import os.path as osp
 from abc import ABC, abstractmethod
 from typing import Literal, cast
 
-import gym
+import gymnasium as gym
 import torch
 import torch.nn as nn
-from gym.spaces import Box, Discrete, MultiBinary, MultiDiscrete
+from gymnasium.spaces import Box, Discrete, MultiBinary, MultiDiscrete
 
 
 class BasePolicy(ABC, nn.Module):
-    """
-    Abstract base class for RL policies.
+    """Abstract base class for RL policies.
 
     Attributes:
         _action_type (Literal["discrete", "continuous"]): The type of actions (inferred or specified).
         updating (bool): Flag to indicate if the policy is currently being updated.
+
     """
 
     _action_type: Literal["discrete", "continuous"] | None = None
@@ -30,8 +30,7 @@ class BasePolicy(ABC, nn.Module):
         action_bound_method: Literal["clip", "tanh"] | None = "clip",
         lr_scheduler: None = None,
     ) -> None:
-        """
-        Initialize the BasePolicy.
+        """Initialize the BasePolicy.
 
         Args:
             action_space (gym.Space): The action space of the policy.
@@ -39,6 +38,7 @@ class BasePolicy(ABC, nn.Module):
             action_scaling (bool, optional): Whether to scale actions. Defaults to False.
             action_bound_method (Literal["clip", "tanh"], optional): Method to bound actions. Defaults to "clip".
             lr_scheduler (optional): Learning rate scheduler. Defaults to None.
+
         """
         super().__init__()
         self.action_space = action_space
@@ -49,11 +49,11 @@ class BasePolicy(ABC, nn.Module):
 
     @property
     def action_type(self) -> Literal["discrete", "continuous"]:
-        """
-        Determines the action type based on the action space.
+        """Determines the action type based on the action space.
 
         Returns:
             Literal["discrete", "continuous"]: The type of actions.
+
         """
         if self._action_type is not None:
             return self._action_type
@@ -70,26 +70,20 @@ class BasePolicy(ABC, nn.Module):
 
     @abstractmethod
     def train(self) -> None:
-        """
-        Abstract method for training the policy. Must be implemented by subclasses.
-        """
-        pass
+        """Abstract method for training the policy. Must be implemented by subclasses."""
 
     @abstractmethod
     def evaluate(self) -> None:
-        """
-        Abstract method for evaluating the policy. Must be implemented by subclasses.
-        """
-        pass
+        """Abstract method for evaluating the policy. Must be implemented by subclasses."""
 
     def save(self, path: str, filename: str = "policy.pt", verbose: bool = False) -> None:
-        """
-        Saves the policy state_dict and other components.
+        """Saves the policy state_dict and other components.
 
         Args:
             path (str): Directory to save the policy.
             filename (str): Filename for the saved file. Defaults to "policy.pt".
             verbose (bool): Whether to print information. Defaults to False.
+
         """
         os.makedirs(path, exist_ok=True)
         objects_to_save = {}
@@ -114,8 +108,7 @@ class BasePolicy(ABC, nn.Module):
         filename: str = "policy.pt",
         verbose: bool = False,
     ) -> None:
-        """
-        Loads the policy state_dict and other components.
+        """Loads the policy state_dict and other components.
 
         Args:
             path (str, optional): Directory to load the policy from.
@@ -126,6 +119,7 @@ class BasePolicy(ABC, nn.Module):
         Raises:
             ValueError: If neither `path` nor `state_dict` is provided.
             AssertionError: If the loaded data is not a dictionary.
+
         """
         objects_loaded = state_dict
 

@@ -19,8 +19,8 @@ def make(
     wrappers = wrappers or []
 
     # Set default render mode
-    if "render_mode" not in env_spec_kwargs:
-        env_spec_kwargs["render_mode"] = "rgb_array"
+    # if "render_mode" not in env_spec_kwargs:
+    #     env_spec_kwargs["render_mode"] = "rgb_array"
 
     return gym.make_vec(
         env_id,
