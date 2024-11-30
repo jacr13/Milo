@@ -161,7 +161,20 @@ class Collector:
             if render:
                 pixels = self.env.render()
 
-            transition = Transition(obs, actions, rewards, next_obs, done, terminated, truncated, info, pixels)
+            transition = Transition(
+                obs=obs,
+                action=actions,
+                reward=rewards,
+                next_obs=next_obs,
+                done=done,
+                terminated=terminated,
+                truncated=truncated,
+                returns=None,
+                advantages=None,
+                info=info,
+                pixels=pixels,
+            )
+
             self._add_to_buffer(transition)
 
             obs = next_obs
