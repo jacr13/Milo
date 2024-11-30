@@ -29,8 +29,7 @@ class Transition:
         self.pixels = pixels
 
     def flatten(self):
-        stop
-        return self.__dict__
+        return []
 
     def __repr__(self) -> str:
         return (
