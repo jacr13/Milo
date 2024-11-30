@@ -26,6 +26,7 @@ class ReplayBuffer:
         self._idx_current = 0
 
     def push(self, transition: Transition) -> None:
+        # TODO: check capacity with number of environments
         if self.capacity is not None and len(self.buffer) >= self.capacity:
             self.buffer.pop(0)  # Remove the first element if the buffer is full
         self.buffer.append(transition)
