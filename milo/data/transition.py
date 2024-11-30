@@ -11,6 +11,8 @@ class Transition:
         done: np.ndarray,
         terminated: np.ndarray | None = None,
         truncated: np.ndarray | None = None,
+        returns: np.ndarray | None = None,
+        advantages: np.ndarray | None = None,
         info: dict | None = None,
         pixels: tuple | np.ndarray | None = None,
     ) -> None:
