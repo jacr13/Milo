@@ -24,6 +24,8 @@ train_collector = Collector(None, train_env)
 train_collector.reset()
 train_collector.collect(n_step=1000, reset_before_collect=True)
 
+print(train_collector.buffer[0])
+
 buffer = train_collector.buffer
 batch = buffer.to_batch()
 

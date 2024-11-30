@@ -33,18 +33,23 @@ class ReplayBuffer:
     def batches(
         self,
         batch_size: int,
+        flatten: bool = True,
         exclude: list | None = None,
         only: list | None = None,
     ) -> Iterator[Batch]:
         batch_size = batch_size or len(self.buffer)
 
-        idx_to_sample = list(range(len(self.buffer)))
+        buffer = self.buffer
+        if flatten:
+            buffer = [*transision.flatten() for transition in self.buffer]
+
+        idx_to_sample = list(range(len(buffer)))
         self._random.shuffle(idx_to_sample)
 
         # Iterate over the shuffled indices in chunks of `batch_size`
         for start in range(0, len(idx_to_sample), batch_size):
             batch_indices = idx_to_sample[start : start + batch_size]
-            batch = [self.buffer[idx] for idx in batch_indices]
+            batch = [buffer[idx] for idx in batch_indices]
             yield Batch(batch)
 
     def sample(
@@ -67,7 +72,7 @@ class ReplayBuffer:
         return Batch(self.buffer, exclude=exclude, only=only)
 
     def compute_returns_and_advantages(self) -> (None, None):
-
+        returns, advantages = [], []
         return returns, advantages
 
     def __len__(self) -> int:

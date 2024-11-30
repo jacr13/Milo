@@ -28,6 +28,10 @@ class Transition:
         self.info = info
         self.pixels = pixels
 
+    def flatten(self):
+        stop
+        return self.__dict__
+
     def __repr__(self) -> str:
         return (
             f"Transition(\n"
