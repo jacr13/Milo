@@ -69,8 +69,8 @@ print(returns)
 print(advantages)
 
 for i in range(len(buffer.buffer)):
-    transaction = buffer.buffer[i]
-    mask = 1.0 - train_collector.done
+    transition = buffer.buffer[i]
+    mask = 1.0 - transition.done
     print(mask)
 
 
